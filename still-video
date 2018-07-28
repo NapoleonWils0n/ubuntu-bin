@@ -30,8 +30,8 @@ ffmpeg \
 -stats -v panic \
 -loop 1 \
 -r 1 \
--i $image \
--i $audio \
+-i "$image" \
+-i "$audio" \
 -c:v libx264 \
 -preset veryfast \
 -tune stillimage \
