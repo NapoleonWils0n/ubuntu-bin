@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-chromium --alsa-output-device='plughw:1,0'
