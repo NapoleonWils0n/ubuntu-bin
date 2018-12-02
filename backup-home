@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# rsync home backup
+rsync --delete --progress -azvv /home/djwilcox root@192.168.1.25::NetBackup/ubuntu/
