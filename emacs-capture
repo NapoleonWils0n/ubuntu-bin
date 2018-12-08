@@ -1,2 +1,6 @@
 #!/bin/bash
-/usr/bin/emacsclient -c -F "((name . \"emacs-capture\") (height . 25) (width . 100))" "$@"
+
+#/usr/bin/emacsclient -c -F "((name . \"emacs-capture\") (height . 25) (width . 100))" "$@"
+
+# use emacs for capture
+/usr/bin/emacsclient "$@"
