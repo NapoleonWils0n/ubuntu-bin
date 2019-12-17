@@ -1,20 +1,11 @@
 #!/bin/sh
 
 # normalize audio levels
-# code based on:
-# https://video.stackexchange.com/questions/16352/converting-gimp-curves-files-to-photoshop-acv-for-ffmpeg/20005#20005
-
-# correct a video clip by using a gimp curve
-# converted into a ffmpeg curves filter command
-# to adjust the levels and white balance
-
-# requires a curve file created with the following script
-# https://github.com/NapoleonWils0n/curve2ffmpeg
 
 # script usage
 usage()
 {
-  echo "$(basename "$0") -i infile.(mp4|mkv|mov|m4v) -d (0.[0-9]|1) -c curve.txt"
+  echo "$(basename "$0") -i infile.(mp4|mkv|mov|m4v|aac|m4a|wav|mp3)"
   exit 2
 }
 
@@ -26,26 +17,21 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 ARGS_ERR='incorrect arguments passed to script'
 FILE_EXT_ERR='has the wrong file extension'
 NOT_MEDIA_FILE_ERR='is not a media file'
-NOT_TEXT_FILE_ERR='is not a text file'
 
 # number of args passed to script, needs to be stored before getopts
 if [ $# -gt 0 ]; then
-    first_arg="$1"
-    third_arg="$3"
-    fifth_arg="$5"
+    firstarg="$1"
     args="$#"
 else
    { echo "${WRONG_ARGS_ERR}" && usage; }
 fi
 
 # getopts and check if input a file
-while getopts ':i:d:c:h' opt
+while getopts ':i:h' opt
 do
   case ${opt} in
      i) infile="${OPTARG}"
 	[ -f "${infile}" ] || { echo "${infile} ${NOTFILE_ERR}" && usage; };;
-     d) dur="${OPTARG}";;
-     c) text="${OPTARG}";;
      h) usage;;
      \?) echo "${INVALID_OPT_ERR} ${OPTARG}" 1>&2 && usage;;
      :) echo "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2 && usage;;
@@ -53,79 +39,59 @@ do
 done
 shift $((OPTIND-1))
 
-# duration regex match 0.[1-9]
-dur_short='^[0]\{1\}\.[1-9]\{1\}$'
-# duration regex match 1
-dur_long='^[1]\{1\}$'
-
 # check arguments
-if [ "${args}" -eq 6 ]; then
+if [ "${args}" -eq 2 ]; then
    {
-   [ "${first_arg}" = '-i' ] && \
+   [ "${firstarg}" = '-i' ] && \
    [ -f "${infile}" ]
-   [ "${third_arg}" = '-d' ] && \
-   expr "${dur}" : "${dur_short}" 1>/dev/null \
-       || expr "${dur}" : "${dur_long}" 1>/dev/null && \
-   [ "${fifth_arg}" = '-c' ] && \
-   [ -f "${text}" ]
    } || { echo "${ARGS_ERR}" && usage; }
 else
    { echo "${WRONG_ARGS_ERR}" && usage; }
 fi
 
-# infile, infile name and file extension
+# infile, infile name and extension
 infile_nopath="${infile##*/}"
 infile_name="${infile_nopath%.*}"
 infile_ext="${infile##*.}"
-
-# text extension
-text_ext="${text##*.}"
 
 # file extension regular expressions for case statement
 mp4='[Mm][Pp]4'
 mkv='[Mm][Kk][Vv]'
 mov='[Mm][[Oo][Vv]'
 m4v='[Mm]4[Vv]'
+aac='[Aa][Aa][Cc]'
+m4a='[Mm]4[Aa]'
+wav='[Ww][Aa][Vv]'
+mp3='[Mm][Pp]3'
 
-# text file regular expressions for case statement
-txt='[Tt][Xx][Tt]'
-
-# check the text file extension before passing to the file command
-case "${text_ext}" in
-    ${txt});;
-    *) { echo "${text} ${FILE_EXT_ERR}" && usage; };;
-esac
-
-# run the video function based on the file extension
-case "${infile_ext}" in
-    ${mp4}|${mkv}|${mov}|${m4v});;
+# check file extension
+case "$infile_ext" in
+    ${mp4}|${mkv}|${mov}|${m4v}| \
+    ${aac}|${m4a}|${wav}|${mp3});;
     *) { echo "${infile} ${FILE_EXT_ERR}" && usage; };;
 esac
 
 # file command check input file mime type
 filetype="$(file --mime-type -b "${infile}")"
-textfile="$(file --mime-type -b "${text}")"
 
-# video mimetypes
+# audio and video mimetypes
 mov_mime='video/quicktime'
 mkv_mime='video/x-matroska'
 mp4_mime='video/mp4'
 m4v_mime='video/x-m4v'
+wav_mime='audio/x-wav'
+audio_mime='audio/mpeg'
+aac_mime='audio/x-hx-aac-adts'
 
-# text mimetype
-txt_mime='text/plain'
-
-# check the text file mime type is a text
-case "${textfile}" in
-    ${txt_mime});;
-    *) { echo "${textfile} ${NOT_TEXT_FILE_ERR}" && usage; };;
+# check the files mime type
+case "${filetype}" in
+    ${mov_mime}|${mkv_mime}|${mp4_mime}|${m4v_mime}| \
+    ${wav_mime}|${audio_mime}|${aac_mime});;
+    *) { echo "${infile} ${NOT_MEDIA_FILE_ERR}" && usage; };;
 esac
 
-# read the contents of the curve text file and store in a variable
-text_contents="$(while IFS= read -r line; do echo "${line}"; done < "${text}")"
-
 # outfile file recording destination
-normalized_file="${infile_name}-normalized-$(date +"%Y-%m-%d-%H-%M-%S").mp4"
+normalized_file="${infile_name}-normalized-$(date +"%Y-%m-%d-%H-%M-%S").${infile_ext}"
 
 # print analyzing file
 echo '+ Analyzing file with ffmpeg'
@@ -138,7 +104,7 @@ normalize=$(ffmpeg \
 -f null - 2>&1 | tail -n 12)
 
 # read the output of normalize line by line and store in variables
-for line in "{$normalize}"; do
+for line in "${normalize}"; do
     measured_I=$(echo "${line}" | awk -F' ' '/Input Integrated:/ {print $3}')
     measured_TP=$(echo "${line}" | awk -F' ' '/Input True Peak:/ {print $4}')
     measured_LRA=$(echo "${line}" | awk -F' ' '/Input LRA:/ {print $3}')
@@ -146,23 +112,14 @@ for line in "{$normalize}"; do
     offset=$(echo "${line}" | awk -F' ' '/Target Offset:/ {print $3}')
 done
 
-# video function
-video () {
-    video_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${infile}" | cut -d\. -f1)
-    vid_offset=$(echo "${video_dur}-${dur}" | bc -l)
+# audio function
+audio () {
     ffmpeg \
     -hide_banner \
     -stats -v panic \
     -i "${infile}" \
     -filter_complex \
-    "[0:a] afade=t=in:st=0:d=${dur},afade=t=out:st='${vid_offset}':d=${dur},
-    compand=attacks=0:points=-70/-90|-24/-12|0/-6|20/-6,
-    highpass=f=60,
-    lowpass=f=13700,
-    afftdn=nt=w,
-    adeclick,
-    deesser,
-    loudnorm=I=-16:
+    "loudnorm=I=-16:
     dual_mono=true:
     TP=-1.5:
     LRA=11:
@@ -172,21 +129,43 @@ video () {
     measured_thresh=${measured_thresh}:
     offset=${offset}:
     linear=true:
-    print_format=summary [audio];
-    [0:v] ${text_contents},fade=t=in:st=0:d=${dur},fade=t=out:st='${vid_offset}':d=${dur}[video]" \
-    -map "[video]" -map "[audio]" \
-    -c:a aac -ar 44100 \
-    -c:v libx264 -preset fast \
-    -profile:v high \
-    -crf 18 -coder 1 \
+    print_format=summary [audio]" \
+    -map "[audio]" \
     -pix_fmt yuv420p \
     -movflags +faststart \
     -f mp4 \
     "${normalized_file}"
 }
 
-# check the files mime type
+# video function
+video () {
+    ffmpeg \
+    -hide_banner \
+    -stats -v panic \
+    -i "${infile}" \
+    -c:v copy \
+    -filter_complex \
+    "loudnorm=I=-16:
+    dual_mono=true:
+    TP=-1.5:
+    LRA=11:
+    measured_I=${measured_I}:
+    measured_LRA=${measured_LRA}:
+    measured_TP=${measured_TP}:
+    measured_thresh=${measured_thresh}:
+    offset=${offset}:
+    linear=true:
+    print_format=summary [audio]" \
+    -map 0:v -map "[audio]" \
+    -pix_fmt yuv420p \
+    -movflags +faststart \
+    -f mp4 \
+    "${normalized_file}"
+}
+
+# check if the mime type is audio or vide then run the correct function
 case "${filetype}" in
     ${mov_mime}|${mkv_mime}|${mp4_mime}|${m4v_mime}) video "${infile}";;
+    ${wav_mime}|${audio_mime}|${aac_mime}) audio "${infile}";;
     *) { echo "${infile} ${NOT_MEDIA_FILE_ERR}" && usage; };;
 esac
