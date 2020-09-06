@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# backup home to usb
+rsync -aAXvz --ignore-errors --delete --progress /home/djwilcox /mnt/usb
