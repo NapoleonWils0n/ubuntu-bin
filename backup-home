@@ -1,4 +1,4 @@
 #!/bin/sh
 
 # rsync home backup
-rsync -avz -e ssh --delete --progress /home/djwilcox macmini:rsync/ubuntu
+rsync -avz --ignore-errors -e ssh --delete --progress /home/djwilcox macmini:rsync/ubuntu
