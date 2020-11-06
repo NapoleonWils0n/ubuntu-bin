@@ -1,4 +1,4 @@
 #!/bin/sh
 
 # ducky keyboard
-setxkbmap -device 18 -layout gb -variant mac -option ctrl:swap_lalt_lctl,altwin:alt_super_win
+setxkbmap -device 11 -layout gb -variant mac -option ctrl:swap_lalt_lctl,altwin:alt_super_win
