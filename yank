@@ -72,7 +72,7 @@ error_check=$(expr "${url_check}" : "${atom_error}")
 #===============================================================================
 
 one_stream () {
-kodi-send --host=127.0.0.1 --port=9777 --action="PlayMedia("${url}")" 1>/dev/null
+kodi-send --host=127.0.0.1 --port=9777 --action="PlayMedia(${url},[noresume])" 1>/dev/null
 }
 
 #===============================================================================
