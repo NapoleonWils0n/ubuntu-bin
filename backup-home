@@ -1,4 +1,14 @@
 #!/bin/sh
 
 # rsync home backup
-rsync -avz --ignore-errors -e ssh --delete --progress /home/djwilcox macmini:rsync/ubuntu
+rsync -avz --ignore-errors -e ssh --delete --progress \
+--exclude Downloads \
+--exclude Music \
+--exclude Public \
+--exclude roms \
+--exclude snap \
+--exclude Templates \
+--exclude torrents \
+--exclude .cache \
+--exclude .dbus \
+/home/djwilcox macmini:rsync/ubuntu

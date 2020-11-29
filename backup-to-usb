@@ -1,4 +1,14 @@
 #!/bin/sh
 
 # backup home to usb
-rsync -aAXvz --ignore-errors --delete --progress /home/djwilcox /mnt/usb
+rsync -aAXvz --ignore-errors --delete --progress
+--exclude Downloads \
+--exclude Music \
+--exclude Public \
+--exclude roms \
+--exclude snap \
+--exclude Templates \
+--exclude torrents \
+--exclude .cache \
+--exclude .dbus \
+/home/djwilcox /mnt/usb
