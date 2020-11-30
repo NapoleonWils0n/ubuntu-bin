@@ -101,7 +101,7 @@ ffmpeg \
 -c:a copy -c:v copy \
 -tune zerolatency \
 -map 0:0 -map 1:0 \
--f mpegts 'udp://127.0.0.1:1234?pkt_size=1316'
+-f mpegts "udp://{ip}:1234?pkt_size=1316"
 }
 
 #===============================================================================
