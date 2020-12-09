@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # backup home to usb
-rsync -aAXvz --ignore-errors --delete --progress
+rsync -aAXvz --ignore-errors --delete --progress \
 --exclude Downloads \
 --exclude Music \
 --exclude Public \
