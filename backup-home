@@ -10,4 +10,6 @@ rsync -avz --ignore-errors -e ssh --delete --progress \
 --exclude torrents \
 --exclude .cache \
 --exclude .dbus \
+--exclude .var \
+--exclude .local/share/flatpak \
 /home/djwilcox macmini:rsync/ubuntu
