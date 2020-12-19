@@ -5,6 +5,7 @@ rsync -aAXvz --ignore-errors --delete --progress \
 --exclude Downloads \
 --exclude Music \
 --exclude Public \
+--exclude roms \
 --exclude snap \
 --exclude Templates \
 --exclude torrents \
