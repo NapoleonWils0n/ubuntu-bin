@@ -3,11 +3,11 @@
 # backup home to usb
 rsync -aAXvz --ignore-errors --delete --progress \
 --exclude Downloads \
+--exclude Documents/BlackmagicDesign \
+--exclude GPUCache \
 --exclude Music \
---exclude Public \
 --exclude roms \
 --exclude snap \
---exclude Templates \
 --exclude torrents \
 --exclude Videos \
 --exclude .cache \

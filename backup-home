@@ -3,11 +3,12 @@
 # rsync home backup
 rsync -avz --ignore-errors -e ssh --delete --progress \
 --exclude Downloads \
+--exclude Documents/BlackmagicDesign \
+--exclude GPUCache \
 --exclude Music \
---exclude Public \
 --exclude snap \
---exclude Templates \
 --exclude torrents \
+--exclude Videos \
 --exclude .cache \
 --exclude .dbus \
 --exclude .var \
