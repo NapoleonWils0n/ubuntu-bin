@@ -13,6 +13,9 @@ INVALID_OPT_ERR='Invalid option:'
 REQ_ARG_ERR='requires an argument'
 WRONG_ARGS_ERR='wrong number of arguments passed to script'
 
+# mpd host
+socket='/home/djwilcox/.config/mpd/socket'
+
 # if script is run arguments pass and check the options with getopts,
 # else display script usage and exit
 [ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
@@ -38,18 +41,18 @@ name=$(echo "${url}" | awk -F'https:' '{print $1}') # name of song
 yt () {
     if [ -z "$(mpc current)" ]; then # nothing playing
         if [ -z "$(mpc playlist)" ]; then # playlist empty
-           mpc add "${link}"
-           mpc play 
+           mpc --host="${socket}" add "${link}"
+           mpc --host="${socket}" play 
 	   notify-send "Now Playing ♫" "${name}"
 	else # playlist not empty so clear add url and play
-           mpc clear
-	   mpc add "${link}"
-           mpc play 
+           mpc --host="${socket}" clear
+	   mpc --host="${socket}" add "${link}"
+           mpc --host="${socket}" play 
 	   notify-send "Now Playing ♫" "${name}"
 	fi
     else # audio playing insert url and play next
-        mpc insert "${link}" 
-	mpc next
+        mpc --host="${socket}" insert "${link}" 
+	mpc --host="${socket}" next
 	notify-send "Now Playing ♫" "${name}"
     fi
 }
