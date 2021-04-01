@@ -53,7 +53,7 @@ yt () {
     else # audio playing insert url and play next
         mpc --host="${host}" insert "${link}" 
 	mpc --host="${host}" next
-	notify-send "Now Playing ♫" "${name}"
+	notify-send "Now Playing ♫" "${name}" 2>/dev/null
     fi
 }
 
