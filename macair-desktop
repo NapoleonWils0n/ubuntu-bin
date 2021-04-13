@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# remap ctrl to alt, alt to super, super to ctrl
+xkbcomp -I$HOME/.xkb $HOME/.xkb/keymap/keymap.xkb $DISPLAY
+
+# feh set wallpaper
+feh --no-fehbg --bg-center '/home/djwilcox/.config/wallpaper/wallpaper.png' 
+
+# set the cursor form xmonad
+xsetroot -cursor_name left_ptr
