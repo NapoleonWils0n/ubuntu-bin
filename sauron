@@ -3,15 +3,16 @@
 # input set to args passed to script
 input=$(printf "%s\n" "$@")
 
-# audio and video functions
+# mpd and taskspooler
 audio() {
     printf "%s\n" "${input}" | \
     while read line
     do
-      pinch -i "${line}" 1>/dev/null
+      tsp pinch -i "${line}" 1>/dev/null 
     done
 }
 
+# mpv and taskspooler
 video() {
     printf "%s\n" "${input}" | \
     while read line
@@ -20,6 +21,7 @@ video() {
     done
 }
 
+# mpv second display and taskspooler
 queue() {
     printf "%s\n" "${input}" | \
     while read line
