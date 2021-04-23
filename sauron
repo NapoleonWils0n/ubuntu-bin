@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# external video player script for ytfzf
+
 # input set to args passed to script
 input=$(printf "%s\n" "$@")
 
@@ -30,13 +32,16 @@ queue() {
     done
 }
 
-# fzf prompt
-menu=$(printf "%s\n" 'audio' 'video' 'queue' | fzf --delimiter='\n' --prompt="Search: " --info=inline --layout=reverse --no-multi)
+# fzf prompt to specify function to run on links from ytfzf
+audio_tsp='audio - mpd queue audio'
+video_tsp='video - mpv queue video'
+queue_tsp='queue - mpv queue video and play fullscreen on second display'
+menu=$(printf "%s\n" "${audio_tsp}" "${video_tsp}" "${queue_tsp}" | fzf --delimiter='\n' --prompt='Open with: ' --info=inline --layout=reverse --no-multi)
 
-# case statement
+# case statement to run function based on fzf prompt output
 case "${menu}" in
-   audio) audio;;
-   video) video;;
-   queue) queue;;
+   audio*) audio;;
+   video*) video;;
+   queue*) queue;;
    *) exit;;
 esac
