@@ -1,6 +1,9 @@
 #!/bin/sh
 
-# external video player script for ytfzf
+# sauron - external video player script for ytfzf
+
+# if script is run without arguments exit
+[ $# -gt 0 ] || exit
 
 # input set to args passed to script
 input=$(printf "%s\n" "$@")
