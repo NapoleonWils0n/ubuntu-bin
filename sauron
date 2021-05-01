@@ -21,7 +21,8 @@ download() {
     printf "%s\n" "${input}" | \
     while read line
     do
-      tsp youtube-dl -f 'bestvideo[height<=?1080][fps<=?30][vcodec!=?vp9]+bestaudio/best' \
+      tsp -L "${line}" \
+      youtube-dl -f 'bestvideo[height<=?1080][fps<=?30][vcodec!=?vp9]+bestaudio/best' \
       --restrict-filenames \
       --no-playlist \
       --external-downloader aria2c \
