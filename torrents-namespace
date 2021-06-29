@@ -1,4 +1,0 @@
-#!/bin/sh
-
-# start transmission-daemon
-transmission-daemon
