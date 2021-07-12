@@ -1,5 +1,0 @@
-#!/bin/sh
-
-# transmission add magnet link from browser
-
-transmission-remote --add "$@"
