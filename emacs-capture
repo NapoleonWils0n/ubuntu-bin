@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 
-#/usr/bin/emacsclient -c -F "((name . \"emacs-capture\") (height . 25) (width . 100))" "$@"
+# org mode capture
+/usr/bin/emacsclient -c -F "((name . \"emacs-capture\") (height . 25) (width . 100))" "$@"
 
 # use emacs for capture
-/usr/bin/emacsclient "$@"
+#/usr/bin/emacsclient "$@"
