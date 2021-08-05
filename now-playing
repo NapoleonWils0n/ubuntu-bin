@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# playercrl + dunst
+
+# metadata
+metadata=$(playerctl metadata --format '{{ title }}#Player: {{ playerName }}#Status: {{ status }}#{{ mpris:artUrl }}')
+
+# title
+title=$(echo "${metadata}" | cut -d '#' -f 1 --output-delimiter="\n")
+
+# body
+body=$(echo "${metadata}" | cut -d '#' -f 2-3 --output-delimiter="\n")
+
+# icon
+icon=$(echo "${metadata}" | cut -d '#' -f 4 | sed 's#file://##')
+
+# dunst check for artUrl
+if [ -z "${icon}" ]; then
+  notify-send "${title}" "${body}" 1>/dev/null
+else
+  notify-send -i "${icon}" "${title}" "${body}" 1>/dev/null
+fi
