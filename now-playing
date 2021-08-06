@@ -2,21 +2,30 @@
 
 # playercrl + dunst
 
-# metadata
-metadata=$(playerctl metadata --format '{{ title }}#Artist: {{ artist }}#Player: {{ playerName }}#Status: {{ status }}#{{ mpris:artUrl }}')
+# get the metadata from the active player
+metadata=$(playerctl metadata --format '{{ title }}#{{ artist }}#{{ playerName }}#{{ status }}#{{ mpris:artUrl }}')
 
-# title
+# dunst title
 title=$(echo "${metadata}" | cut -d '#' -f 1 --output-delimiter="\n")
 
-# body
-body=$(echo "${metadata}" | cut -d '#' -f 2-4 --output-delimiter="\n")
+# artist
+artist=$(echo "${metadata}" | cut -d '#' -f 2 --output-delimiter="\n")
+artist_fallback='Unknown'
 
-# icon
+# player
+player=$(echo "${metadata}" | cut -d '#' -f 3 --output-delimiter="\n")
+
+# status
+status=$(echo "${metadata}" | cut -d '#' -f 4 --output-delimiter="\n")
+
+# combined
+body="Artist: ${artist:=${artist_fallback}}\nPlayer: ${player}\nStatus: ${status}"
+
+# dunst icon using mpris:artUrl
 icon=$(echo "${metadata}" | cut -d '#' -f 5 | sed 's#file://##')
 
-# dunst check for artUrl
-if [ -z "${icon}" ]; then
-  notify-send "${title}" "${body}" 1>/dev/null
-else
-  notify-send -i "${icon}" "${title}" "${body}" 1>/dev/null
-fi
+# fallback icon
+icon_fallback='/usr/share/icons/Adwaita/48x48/legacy/face-smile.png'
+
+# notify-send
+notify-send -i "${icon:=${icon_fallback}}" "${title}" "${body}"
