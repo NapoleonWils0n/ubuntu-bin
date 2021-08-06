@@ -10,15 +10,17 @@ title=$(echo "${metadata}" | cut -d '#' -f 1 --output-delimiter="\n")
 
 # artist
 artist=$(echo "${metadata}" | cut -d '#' -f 2 --output-delimiter="\n")
+
+# artist fallback text
 artist_fallback='Unknown'
 
-# player
-player=$(echo "${metadata}" | cut -d '#' -f 3 --output-delimiter="\n")
+# player name capitalized with awk
+player=$(echo "${metadata}" | cut -d '#' -f 3 --output-delimiter="\n" | awk '{for(i=1;i<=NF;i++){ $i=toupper(substr($i,1,1)) substr($i,2) }}1')
 
-# status
+# player status
 status=$(echo "${metadata}" | cut -d '#' -f 4 --output-delimiter="\n")
 
-# combined
+# body - artist, player, status combined
 body="Artist: ${artist:=${artist_fallback}}\nPlayer: ${player}\nStatus: ${status}"
 
 # dunst icon using mpris:artUrl
