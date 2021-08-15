@@ -45,11 +45,13 @@ iconcheck=$(expr "${icon}" : "file://")
 
 # if urlcheck equals 0 doesnt match file:// and so is a http link
 if [ "${iconcheck}" -eq 0 ]; then
+  if [ ! -z "${arturl}" ]; then
   # remove file://
   imageurl=$(echo "${metadata}" | awk -F'[][]' -v RS=" " '/arturl/ {print $2}' | sed 's#file://##')
   imagetmp=$(mktemp /tmp/playerctlXXX --suffix=.png)
   curl "${imageurl}" -o "${imagetmp}" 2>/dev/null
   icon="${imagetmp}" # set icon to ffmpeg thumbail
+  fi
 fi
 
 # fallback icon
@@ -100,3 +102,4 @@ body="Artist: ${artist:=${artist_fallback}}\nPlayer: ${player}\nStatus: ${status
 #====================================================================
 
 notify-send -i "${icon:=${icon_fallback}}" "${title}" "${body}"
+
