@@ -18,7 +18,7 @@ metadata=$(playerctl metadata --format 'title=[{{ title }}] artist=[{{ artist }}
 title=$(echo "${metadata}" | awk -F'[][]' -v RS="" '/title/ {print $2}')
 
 # artist
-artist=$(echo "${metadata}" | awk -F'[][]' -v RS=" " '/artist/ {print $2}')
+artist=$(echo "${metadata}" | awk -F'[][]' '/artist/ {print $4}')
 
 # artist fallback text
 artist_fallback='Unknown'
