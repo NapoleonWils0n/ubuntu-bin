@@ -14,8 +14,8 @@ metadata=$(playerctl metadata --format 'title=[{{ title }}] artist=[{{ artist }}
 # variables
 #====================================================================
 
-# dunst title
-title=$(echo "${metadata}" | awk -F'[][]' -v RS="" '/title/ {print $2}')
+# dunst title - truncate length to 40 charcters with awk
+title=$(echo "${metadata}" | awk -F'[][]' -v RS="" '/title/ {print $2}' | awk 'length > 40{$0=substr($0,0,41)"..."}1')
 
 # artist
 artist=$(echo "${metadata}" | awk -F'[][]' '/artist/ {print $4}')
