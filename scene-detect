@@ -135,7 +135,7 @@ if [ -z "${format}" ]; then
 else 
   # minutes
   echo "scene detection with threshold set to ${threshold:=${threshold_default}}"
-  start='00:00:00'
+  start='"0:00:00"'
   ffdetect_sexagesimal
 fi
 
@@ -145,5 +145,5 @@ fi
 #===============================================================================
 
 echo "${detection}" \
-| awk 'BEGIN { printf("%f\n", '"${start}"') }{ printf("%s\n", $0) } END { printf("%f\n", '"${duration}"') }' \
+| awk 'BEGIN { printf("%s\n", '"${start}"') }{ printf("%s\n", $0) } END { printf("%f\n", '"${duration}"') }' \
 > "${output:=${output_default}}"
