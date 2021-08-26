@@ -17,8 +17,8 @@ echo "\
 $(basename "$0") -i infile -t 0.000
 
 -i infile.(mp4|mov|mkv|m4v)
--t 0.000 # threshold
--o output"
+-t 0.1 - 0.9
+-o output.txt"
 exit 2
 }
 
@@ -66,26 +66,35 @@ shift $((OPTIND-1))
 
 
 #===============================================================================
-# ffprobe
+# ffprobe detection
 #===============================================================================
 
 # threshold default
 threshold_default='0.3'
 
-ffdetect () {
 # video duration
 duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${input}")
 
 # if ffmpeg cant open the file exit
 [ ! -z "${duration}" ] || usage "${input} ${NOT_MEDIA_FILE_ERR}"
 
+
+ffdetect () {
 # scene detection
 detection=$(ffprobe -hide_banner -v panic \
 -show_entries packet=pts_time \
 -of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,"${threshold:=${threshold_default}}")'")
 }
 
-# -sexagesimal
+
+ffdetect_sexagesimal () {
+# scene detection
+detection=$(ffprobe -hide_banner -v panic \
+-sexagesimal \
+-show_entries packet=pts_time \
+-of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,"${threshold:=${threshold_default}}")'")
+}
+
 
 #===============================================================================
 # variables
@@ -111,7 +120,11 @@ lastscene=$(echo "${detection}" | awk 'END { printf("%f\n", $NF) }')
 # if expr equals 1 duration is greater than last scene time
 expression=$(echo "${duration} > ${lastscene}" | bc)
 
-# awk
+
+#===============================================================================
+# create cutfile
+#===============================================================================
+
 echo "${detection}" \
 | awk 'BEGIN { printf("%f\n", '0.0') }{ printf("%s\n", $0) } END { printf("%f\n", '"${duration}"') }' \
 > "${output:=${output_default}}"
