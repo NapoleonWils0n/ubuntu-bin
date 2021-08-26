@@ -69,6 +69,9 @@ shift $((OPTIND-1))
 # ffprobe
 #===============================================================================
 
+# threshold default
+threshold_default='0.3'
+
 ffdetect () {
 # video duration
 duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${input}")
@@ -79,9 +82,10 @@ duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wr
 # scene detection
 detection=$(ffprobe -hide_banner -v panic \
 -show_entries packet=pts_time \
--of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,0.3)'")
+-of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,"${threshold:=${threshold_default}}")'")
 }
 
+# -sexagesimal
 
 #===============================================================================
 # variables
@@ -92,6 +96,7 @@ input_nopath="${input##*/}"
 input_name="${input_nopath%.*}"
 
 # output file name
+output_default="${input_name}-cutfile-$(date +"%Y-%m-%d-%H-%M-%S").txt"
 
 #===============================================================================
 # run function
@@ -107,8 +112,6 @@ lastscene=$(echo "${detection}" | awk 'END { printf("%f\n", $NF) }')
 expression=$(echo "${duration} > ${lastscene}" | bc)
 
 # awk
-cutlist=$(echo "${detection}" | awk 'BEGIN { printf("%f\n", '0.0') }{ printf("%s\n", $0) } END { printf("%f\n", '"${duration}"') }')
-
-
-# display output
-echo "${cutlist}"
+echo "${detection}" \
+| awk 'BEGIN { printf("%f\n", '0.0') }{ printf("%s\n", $0) } END { printf("%f\n", '"${duration}"') }' \
+> "${output:=${output_default}}"
