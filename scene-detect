@@ -121,6 +121,9 @@ duration=$(ffprobe -v error -sexagesimal -show_entries format=duration -of defau
 # if video duration is empty exit
 [ ! -z "${duration}" ] || usage "${input} ${NOT_MEDIA_FILE_ERR}"
 
+# add double quotes around string
+duration="\"${duration}"\"
+
 detection=$(ffprobe -hide_banner -v panic \
 -sexagesimal \
 -show_entries packet=pts_time \
@@ -155,5 +158,5 @@ fi
 #===============================================================================
 
 echo "${detection}" \
-| awk 'BEGIN { printf("%s\n", '"${start}"') }{ printf("%s\n", $0) } END { printf("%f\n", '"${duration}"') }' \
+| awk 'BEGIN { printf("%s\n", '"${start}"') }{ printf("%s\n", $0) } END { printf("%s\n", '"${duration}"') }' \
 > "${output:=${output_default}}"
