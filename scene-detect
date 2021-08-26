@@ -1,0 +1,85 @@
+#!/bin/sh
+
+#===============================================================================
+# ffmpeg scene detection
+#===============================================================================
+
+
+#===============================================================================
+# script usage
+#===============================================================================
+
+usage () {
+# if argument passed to function echo it
+[ -z "${1}" ] || echo "! ${1}"
+# display help
+echo "\
+$(basename "$0") -i infile
+
+-i infile.(mp4|mov|mkv|m4v)
+-o output"
+exit 2
+}
+
+#===============================================================================
+# error messages
+#===============================================================================
+
+INVALID_OPT_ERR='Invalid option:'
+REQ_ARG_ERR='requires an argument'
+WRONG_ARGS_ERR='wrong number of arguments passed to script'
+NOT_MEDIA_FILE_ERR='is not a media file'
+
+
+#===============================================================================
+# check number of aruments passed to script
+#===============================================================================
+
+[ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
+
+
+#===============================================================================
+# getopts check options passed to script
+#===============================================================================
+
+while getopts ':i:o:h' opt
+do
+  case ${opt} in
+     i) input="${OPTARG}";;
+     h) usage;;
+     o) output="${OPTARG}";;
+     \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
+     :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
+  esac
+done
+shift $((OPTIND-1))
+
+
+#===============================================================================
+# variables
+#===============================================================================
+
+# video duration
+duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${input}")
+
+# scene detection
+detection=$(ffprobe -hide_banner -v panic \
+-show_entries packet=pts_time \
+-of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,0.3)'")
+
+# last scene time
+lastscene=$(echo "${detection}" | awk 'END { printf("%f\n", $NF) }')
+
+# if expr equals 1 duration is greater than last scene time
+expression=$(echo "${duration} > ${lastscene}" | bc)
+
+
+# awk
+cutlist=$(echo "${detection}" | awk 'BEGIN { printf("%f\n", '0.0') }{ printf("%s\n", $0) } END { printf("%f\n", '"${duration}"') }')
+
+
+# display output
+echo "duration: ${duration}"
+echo "last scene: ${lastscene}"
+echo "expr: ${expression}"
+echo "${cutlist}"
