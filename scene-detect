@@ -66,11 +66,23 @@ shift $((OPTIND-1))
 
 
 #===============================================================================
-# ffprobe detection
+# variables
 #===============================================================================
+
+# get the input file name
+input_nopath="${input##*/}"
+input_name="${input_nopath%.*}"
+
+# output file name
+output_default="${input_name}-cutfile-$(date +"%Y-%m-%d-%H-%M-%S").txt"
 
 # threshold default
 threshold_default='0.3'
+
+
+#===============================================================================
+# ffprobe detection
+#===============================================================================
 
 # video duration
 duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${input}")
@@ -86,26 +98,6 @@ detection=$(ffprobe -hide_banner -v panic \
 -of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,"${threshold:=${threshold_default}}")'")
 }
 
-
-ffdetect_sexagesimal () {
-# scene detection
-detection=$(ffprobe -hide_banner -v panic \
--sexagesimal \
--show_entries packet=pts_time \
--of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,"${threshold:=${threshold_default}}")'")
-}
-
-
-#===============================================================================
-# variables
-#===============================================================================
-
-# get the input file name
-input_nopath="${input##*/}"
-input_name="${input_nopath%.*}"
-
-# output file name
-output_default="${input_name}-cutfile-$(date +"%Y-%m-%d-%H-%M-%S").txt"
 
 #===============================================================================
 # run function
