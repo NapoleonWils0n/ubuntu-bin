@@ -37,15 +37,24 @@ NOT_MEDIA_FILE_ERR='is not a media file'
 
 [ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
 
+#===============================================================================
+# regular expressions for the expr command
+#===============================================================================
+
+# timecode - match 000.000000
+timecode='^[0-9]\{1,4\}[.]\{1\}[0-9]\{1,6\}$'
+
 
 #===============================================================================
 # getopts check options passed to script
 #===============================================================================
 
-while getopts ':i:o:h' opt
+while getopts ':i:t:o:h' opt
 do
   case ${opt} in
      i) input="${OPTARG}";;
+     t) threshold="${OPTARG}"
+        expr "${threshold}" : "${timecode}" 1>/dev/null || usage;;
      h) usage;;
      o) output="${OPTARG}";;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
@@ -79,7 +88,4 @@ cutlist=$(echo "${detection}" | awk 'BEGIN { printf("%f\n", '0.0') }{ printf("%s
 
 
 # display output
-echo "duration: ${duration}"
-echo "last scene: ${lastscene}"
-echo "expr: ${expression}"
 echo "${cutlist}"
