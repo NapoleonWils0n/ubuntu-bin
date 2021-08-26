@@ -72,6 +72,9 @@ ffdetect () {
 # video duration
 duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${input}")
 
+# if ffmpeg cant open the file exit
+[ ! -z "${duration}" ] || usage
+
 # scene detection
 detection=$(ffprobe -hide_banner -v panic \
 -show_entries packet=pts_time \
