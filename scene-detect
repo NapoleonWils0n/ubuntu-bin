@@ -14,13 +14,14 @@ usage () {
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-$(basename "$0") -i infile -t 0.000
+$(basename "$0") -i infile -t 0.1 - 0.9
 
 -i infile.(mp4|mov|mkv|m4v)
 -t 0.1 - 0.9
 -o output.txt"
 exit 2
 }
+
 
 #===============================================================================
 # error messages
@@ -37,6 +38,7 @@ NOT_MEDIA_FILE_ERR='is not a media file'
 #===============================================================================
 
 [ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
+
 
 #===============================================================================
 # regular expressions for the expr command
@@ -84,37 +86,20 @@ threshold_default='0.3'
 # ffprobe detection
 #===============================================================================
 
-# video duration
+# video duration to append to cutfile
 duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${input}")
 
 # if ffmpeg cant open the file exit
 [ ! -z "${duration}" ] || usage "${input} ${NOT_MEDIA_FILE_ERR}"
 
-
-ffdetect () {
 # scene detection
 detection=$(ffprobe -hide_banner -v panic \
 -show_entries packet=pts_time \
 -of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,"${threshold:=${threshold_default}}")'")
-}
 
 
 #===============================================================================
-# run function
-#===============================================================================
-
-# run the ffdetect function
-ffdetect
-
-# last scene time
-lastscene=$(echo "${detection}" | awk 'END { printf("%f\n", $NF) }')
-
-# if expr equals 1 duration is greater than last scene time
-expression=$(echo "${duration} > ${lastscene}" | bc)
-
-
-#===============================================================================
-# create cutfile
+# create cutfile - prepend 0.0 and append duration
 #===============================================================================
 
 echo "${detection}" \
