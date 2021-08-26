@@ -14,9 +14,10 @@ usage () {
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-$(basename "$0") -i infile
+$(basename "$0") -i infile -t 0.000
 
 -i infile.(mp4|mov|mkv|m4v)
+-t 0.000 # threshold
 -o output"
 exit 2
 }
@@ -28,7 +29,6 @@ exit 2
 INVALID_OPT_ERR='Invalid option:'
 REQ_ARG_ERR='requires an argument'
 WRONG_ARGS_ERR='wrong number of arguments passed to script'
-NOT_MEDIA_FILE_ERR='is not a media file'
 
 
 #===============================================================================
@@ -65,7 +65,7 @@ shift $((OPTIND-1))
 
 
 #===============================================================================
-# variables
+# ffprobe
 #===============================================================================
 
 # video duration
@@ -76,12 +76,20 @@ detection=$(ffprobe -hide_banner -v panic \
 -show_entries packet=pts_time \
 -of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,0.3)'")
 
+
+#===============================================================================
+# variables
+#===============================================================================
+
+# get the input file name
+input_nopath="${input##*/}"
+input_name="${input_nopath%.*}"
+
 # last scene time
 lastscene=$(echo "${detection}" | awk 'END { printf("%f\n", $NF) }')
 
 # if expr equals 1 duration is greater than last scene time
 expression=$(echo "${duration} > ${lastscene}" | bc)
-
 
 # awk
 cutlist=$(echo "${detection}" | awk 'BEGIN { printf("%f\n", '0.0') }{ printf("%s\n", $0) } END { printf("%f\n", '"${duration}"') }')
