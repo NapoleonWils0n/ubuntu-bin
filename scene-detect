@@ -130,7 +130,7 @@ detection=$(ffprobe -hide_banner -v panic \
 if [ -z "${format}" ]; then
   # seconds
   echo "scene detection with threshold set to ${threshold:=${threshold_default}}"
-  start='0.0'
+  start='"0.0"'
   ffdetect
 else 
   # minutes
