@@ -91,11 +91,6 @@ threshold_default='0.3'
 # ffprobe duration
 #===============================================================================
 
-# video duration to append to cutfile
-duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${input}")
-
-# if video duration is empty exit
-[ ! -z "${duration}" ] || usage "${input} ${NOT_MEDIA_FILE_ERR}"
 
 
 #===============================================================================
@@ -103,14 +98,29 @@ duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wr
 #===============================================================================
 
 # seconds output
+
 ffdetect () {
+# video duration to append to cutfile
+duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${input}")
+
+# if video duration is empty exit
+[ ! -z "${duration}" ] || usage "${input} ${NOT_MEDIA_FILE_ERR}"
+
 detection=$(ffprobe -hide_banner -v panic \
 -show_entries packet=pts_time \
 -of default=noprint_wrappers=1:nokey=1 -f lavfi "movie=${input},select='gt(scene,"${threshold:=${threshold_default}}")'")
 }
 
+
 # minutes output
+
 ffdetect_sexagesimal () {
+# video duration to append to cutfile
+duration=$(ffprobe -v error -sexagesimal -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${input}")
+
+# if video duration is empty exit
+[ ! -z "${duration}" ] || usage "${input} ${NOT_MEDIA_FILE_ERR}"
+
 detection=$(ffprobe -hide_banner -v panic \
 -sexagesimal \
 -show_entries packet=pts_time \
