@@ -14,9 +14,9 @@ usage () {
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-$(basename "$0") -i infile -t (0.1 - 0.9) -f min
+$(basename "$0") -i input -t (0.1 - 0.9) -f min
 
--i infile.(mp4|mov|mkv|m4v)
+-i input.(mp4|mov|mkv|m4v)
 -t (0.1 - 0.9)
 -f min # output in minutes
 -o output.txt"
