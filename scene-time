@@ -66,7 +66,7 @@ input_nopath="${input##*/}"
 input_name="${input_nopath%.*}"
 
 # output file name
-output_default="${input_name}-time-$(date +"%Y-%m-%d-%H-%M-%S").txt"
+output_default="${input_name}-cutlist-$(date +"%Y-%m-%d-%H-%M-%S").txt"
 
 
 #===============================================================================
