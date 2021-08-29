@@ -14,11 +14,11 @@ usage () {
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-$(basename "$0") -i input -t (0.1 - 0.9) -f min
+$(basename "$0") -i input -t (0.1 - 0.9) -f seconds
 
 -i input.(mp4|mov|mkv|m4v)
--t (0.1 - 0.9)
--f min # output in minutes
+-t (0.1 - 0.9) # threshold
+-f seconds # output in seconds
 -o output.txt"
 exit 2
 }
@@ -49,7 +49,7 @@ NOT_MEDIA_FILE_ERR='is not a media file'
 threshold_regex='^[0]\{1\}[.]\{1\}[1-9]\{1\}$'
 
 # format_regex
-format_regex='^min$'
+format_regex='^seconds$'
 
 #===============================================================================
 # getopts check options passed to script
@@ -85,13 +85,6 @@ output_default="${input_name}-detection-$(date +"%Y-%m-%d-%H-%M-%S").txt"
 
 # threshold default
 threshold_default='0.3'
-
-
-#===============================================================================
-# ffprobe duration
-#===============================================================================
-
-
 
 #===============================================================================
 # ffprobe scene detection
@@ -139,17 +132,16 @@ detection=$(ffprobe -hide_banner -v panic \
 # if -f format is not specified run ffdetect function
 # otherwise run ffdetect_sexagesimal function
 
-
-if [ -z "${format}" ]; then
-  # seconds
-  echo "scene detection with threshold set to ${threshold:=${threshold_default}}"
-  start='"0.0"'
-  ffdetect
-else 
+if [ ! -z "${format}" ]; then
   # minutes
   echo "scene detection with threshold set to ${threshold:=${threshold_default}}"
   start='"0:00:00"'
   ffdetect_sexagesimal
+else 
+  # seconds
+  echo "scene detection with threshold set to ${threshold:=${threshold_default}}"
+  start='"0.0"'
+  ffdetect
 fi
 
 

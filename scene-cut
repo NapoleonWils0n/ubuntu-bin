@@ -91,6 +91,7 @@ trim_video () {
 while IFS= read -r line; do
    start="$(echo  ${line} | awk -F ',' '{printf("%s\n"), $1}')"
    duration="$(echo  ${line} | awk -F ',' '{printf("%s\n"), $2}')"
-   output="${input_name}-${start}.mp4"
+   output="${input_name}-$(date +"%Y-%m-%d-%H-%M-%S").mp4"
    trim_video
+   sleep 1
 done < "${cutfile}"
