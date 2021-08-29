@@ -81,7 +81,7 @@ input_nopath="${input##*/}"
 input_name="${input_nopath%.*}"
 
 # output file name
-output_default="${input_name}-cutfile-$(date +"%Y-%m-%d-%H-%M-%S").txt"
+output_default="${input_name}-detection-$(date +"%Y-%m-%d-%H-%M-%S").txt"
 
 # threshold default
 threshold_default='0.3'
