@@ -132,7 +132,7 @@ detection=$(ffprobe -hide_banner -v panic \
 # if -f format is not specified run ffdetect function
 # otherwise run ffdetect_sexagesimal function
 
-if [ ! -z "${format}" ]; then
+if [ -z "${format}" ]; then
   # minutes
   echo "scene detection with threshold set to ${threshold:=${threshold_default}}"
   start='"0:00:00"'
