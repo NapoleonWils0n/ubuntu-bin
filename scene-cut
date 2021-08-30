@@ -67,11 +67,13 @@ input_nopath="${input##*/}"
 input_name="${input_nopath%.*}"
 
 #===============================================================================
-# ffmpeg create clips
+# ffmpeg create clips - nostdin needed to avoid clash with read command
 #===============================================================================
 
 trim_video () {
+    output="${input_name}-$(date +"%Y-%m-%d-%H-%M-%S").mp4" 
     ffmpeg \
+    -nostdin \
     -hide_banner \
     -stats -v panic \
     -ss "${start}" \
@@ -84,14 +86,11 @@ trim_video () {
     "${output}"
 }
 
+
 #===============================================================================
-# read file and run ffmpeg
+# read file and set IFS=, read = input before , duration = input after ,
 #===============================================================================
 
-while IFS= read -r line; do
-   start="$(echo  ${line} | awk -F ',' '{printf("%s\n"), $1}')"
-   duration="$(echo  ${line} | awk -F ',' '{printf("%s\n"), $2}')"
-   output="${input_name}-$(date +"%Y-%m-%d-%H-%M-%S").mp4"
-   trim_video
-   sleep 1
-done < "${cutfile}"
+while IFS=, read -r start duration; do
+  trim_video
+done < "${cutfile}"  
