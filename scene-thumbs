@@ -72,7 +72,8 @@ input_name="${input_nopath%.*}"
 
 # image to video function
 extract () {
-  echo ffmpeg \
+  ffmpeg \
+  -nostdin \
   -hide_banner \
   -stats -v panic \
   -ss "${seconds}" \
