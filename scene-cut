@@ -93,4 +93,4 @@ trim_video () {
 
 while IFS=, read -r start duration; do
   trim_video
-done < "${cutfile}"  
+done < "${cutfile}"
