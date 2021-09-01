@@ -70,8 +70,8 @@ input_name="${input_nopath%.*}"
 # ffmpeg extract image
 #===============================================================================
 
-# image to video function
 extract () {
+  output="${input_name}-${count}.png"
   ffmpeg \
   -nostdin \
   -hide_banner \
@@ -88,8 +88,8 @@ extract () {
 # read file and run ffmpeg
 #===============================================================================
 
-while IFS= read -r line; do
-   seconds="${line}"
-   output="${input_name}-${seconds}.png"
+count=0
+while IFS= read -r seconds; do
    extract
+   count="$(expr ${count} + 1)"
 done < "${cutfile}"
