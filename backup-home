@@ -9,6 +9,7 @@ rsync -avz --ignore-errors -e ssh --delete --progress \
 --exclude snap \
 --exclude torrents \
 --exclude Videos \
+--exclude libvirt \
 --exclude .cache \
 --exclude .dbus \
 --exclude .var \
