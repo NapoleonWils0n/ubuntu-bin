@@ -13,6 +13,7 @@ rsync -aAXvz --ignore-errors --delete --progress \
 --exclude libvirt \
 --exclude .cache \
 --exclude .dbus \
+--exclude .mozilla \
 --exclude .var \
 --exclude .googleearth \
 --exclude .local/share/flatpak \
