@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # remap ctrl to alt, alt to super, super to ctrl
-xkbcomp -I$HOME/.xkb $HOME/.xkb/keymap/keymap.xkb $DISPLAY
+xkbcomp -I$HOME/.xkb $HOME/.xkb/keymap/keymap.xkb $DISPLAY 2>/dev/null
 
 # feh set wallpaper
 feh --no-fehbg --bg-center '/home/djwilcox/.config/wallpaper/wallpaper.png' 
