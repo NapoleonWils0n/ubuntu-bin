@@ -2,6 +2,10 @@
 
 # transmission fzf menu
 
+# if transmission-daemon isnt running start it
+transmission-remote -l >/dev/null 2>&1 || transmission-daemon
+
+
 # input = list of torrents
 input=$(transmission-remote -l \
 | head -n -1 \
