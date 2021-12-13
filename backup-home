@@ -10,6 +10,7 @@ rsync -avz --ignore-errors -e ssh --delete --progress \
 --exclude torrents \
 --exclude Videos \
 --exclude libvirt \
+--exclude .linuxbrew \
 --exclude .cache \
 --exclude .dbus \
 --exclude .mozilla \
