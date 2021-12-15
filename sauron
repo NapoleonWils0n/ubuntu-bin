@@ -13,7 +13,7 @@ audio() {
     printf "%s\n" "${input}" | \
     while read line
     do
-      tsp pinch -i "${line}" 1>/dev/null 
+      ts pinch -i "${line}" 1>/dev/null 
     done
 }
 
@@ -21,7 +21,7 @@ download() {
     printf "%s\n" "${input}" | \
     while read line
     do
-      tsp \
+      ts \
       youtube-dl -f 'bestvideo[height<=?1080][fps<=?30][vcodec!=?vp9]+bestaudio/best' \
       --restrict-filenames \
       --no-playlist \
@@ -36,7 +36,7 @@ fullscreen() {
     printf "%s\n" "${input}" | \
     while read line
     do
-      tsp mpv --fs --screen=1 "${line}" 1>/dev/null 
+      ts mpv --fs --screen=1 "${line}" 1>/dev/null 
     done
 }
 
@@ -45,7 +45,7 @@ video() {
     printf "%s\n" "${input}" | \
     while read line
     do
-      tsp mpv --no-terminal "${line}" 1>/dev/null
+      ts mpv --no-terminal "${line}" 1>/dev/null
     done
 }
 
