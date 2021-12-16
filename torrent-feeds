@@ -2,7 +2,7 @@
 
 # newsboat torrent feeds
 [ -d "/etc/netns/vpn" ] \
-&& namespace ~/.linuxbrew/bin/newsboat -C ~/.config/newsboat/config-torrents \
+&& namespace newsboat -C ~/.config/newsboat/config-torrents \
 -u ~/.config/newsboat/urls-torrents -c ~/.local/share/newsboat/cache-torrents.db \
-|| ~/.linuxbrew/bin/newsboat -C ~/.config/newsboat/config-torrents \
+|| newsboat -C ~/.config/newsboat/config-torrents \
 -u ~/.config/newsboat/urls-torrents -c ~/.local/share/newsboat/cache-torrents.db ;
