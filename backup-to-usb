@@ -11,6 +11,9 @@ rsync -aAXvz --ignore-errors --delete --progress \
 --exclude torrents \
 --exclude Videos \
 --exclude libvirt \
+--exclude .nix-channels \
+--exclude .nix-defexpr \
+--exclude .nix-profile \
 --exclude .cache \
 --exclude .dbus \
 --exclude .mozilla \
