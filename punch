@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# pinch send youtube audio to mpd
+# punch send audio links to mpd
 
 # script usage
 usage()
@@ -34,30 +34,24 @@ do
 done
 shift $((OPTIND-1))
 
-# get the audio url and title
-url=$(yt-dlp --no-check-certificate --no-playlist -e -f bestaudio -g "${input}")
-link=$(echo "${url}" | awk -F' ' '/https:/ {print $1}') # audio url
-name=$(echo "${url}" | awk -F'https:' '{print $1}') # name of song
-
 # yt function
-yt () {
+audio () {
     if [ -z "$(mpc --host="${host}" current)" ]; then # nothing playing
         if [ -z "$(mpc --host="${host}" playlist)" ]; then # playlist empty
-           mpc --host="${host}" add "${link}"
+           mpc --host="${host}" add "${input}"
            mpc --host="${host}" play 
-	   notify-send "Now Playing ♫" "${name}"
+	   notify-send "Now Playing ♫" "${input}"
 	else # playlist not empty so clear add url and play
            mpc --host="${host}" clear
-	   mpc --host="${host}" add "${link}"
+	   mpc --host="${host}" add "${input}"
            mpc --host="${host}" play 
-	   notify-send "Now Playing ♫" "${name}"
+	   notify-send "Now Playing ♫" "${input}"
 	fi
     else # audio playing insert url and play next
-        mpc --host="${host}" add "${link}" 
-#	mpc --host="${host}" next
-	notify-send "Queuing ♫" "${name}" 2>/dev/null
+        mpc --host="${host}" add "${input}" 
+	notify-send "Queuing ♫" "${input}" 2>/dev/null
     fi
 }
 
-# run the yt function with the url
-yt "${url}"
+# run the audio function with the url
+audio "${input}"
