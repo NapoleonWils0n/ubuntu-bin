@@ -1,4 +1,4 @@
 #!/bin/sh
 
 # org mode capture
-/usr/bin/emacsclient -c -F "((name . \"emacs-capture\") (height . 25) (width . 100))" "$@"
+emacsclient -c -F "((name . \"emacs-capture\") (height . 25) (width . 100))" "$@"
