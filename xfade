@@ -70,37 +70,24 @@ duration_default='0.5'
 transition_default='fade'
 outfile_default="${clip1_name}-xfade-$(date +"%Y-%m-%d-%H-%M-%S").mp4"
 
-# if dur and offset are unset add transition to end of first clip
-#if [ -z "${dur}" ] && [ -z "${offset}" ];then
-#    # clip 1 duration to calculate default transition offset
-#    clip1_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${clip1}")
-#    # clip1 duration minus duration default to match the end of video for the transition
-#    offset_default=$(echo "${clip1_dur}" - "${duration_default}" | bc -l)
-#else
-#    # trim audio to match length of the duration and offset
-#    audio_trim=$(echo "${dur} + ${offset}" | bc -l)
-#fi
-
 # offset and duration options not set
-
-# clip 1 duration to calculate default transition offset
-clip1_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${clip1}")
-
-# round down decinal point
-clip1_time=$(printf "%.1f\n" "${clip1_dur}")
-
-# clip1 duration minus duration default and 0.1 seconds which is needed for the transition
-offset_default=$(echo "${clip1_time}" - "${duration_default}" - 0.1 | bc -l)
-
-audio_trim=$(echo "${clip1_time}" - 0.1 | bc -l)
-
-# offset and duration options set
-
-# trim audio to match length of the duration and offset
-#audio_trim=$(echo "${dur} + ${offset}" | bc -l)
-
-
-
+if [ -z "${offset}" ];then
+    # clip 1 duration to calculate default transition offset
+    clip1_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${clip1}")
+    
+    # round down decinal point
+    clip1_time=$(printf "%.1f\n" "${clip1_dur}")
+    
+    # clip1 duration minus duration default and 0.1 seconds which is needed for the transition
+    offset_default=$(echo "${clip1_time}" - "${duration_default}" - 0.1 | bc -l)
+    
+    # audio trim default match offset default
+    audio_trim_default=$(echo "${clip1_time}" - 0.1 | bc -l)
+else
+    # offset and duration options set
+    # trim audio to match length of the duration and offset
+    audio_trim=$(echo "${dur} + ${offset}" | bc -l)
+fi
 
 # cross fade video and audio
 xfade_va () {
@@ -110,24 +97,7 @@ xfade_va () {
     -i "${clip1}" -i "${clip2}" \
     -filter_complex \
     "[0:v][1:v]xfade=transition='${transition:=${transition_default}}':duration='${dur:=${duration_default}}':offset='${offset:=${offset_default}}'[xfade];
-    [0:a]atrim=0:'${audio_trim}'[atrim];
-    [atrim][1:a]acrossfade=d='${dur:=${duration_default}}'[afade]
-    " \
-    -map "[xfade]" -map "[afade]" \
-    -pix_fmt yuv420p \
-    -movflags +faststart -f mp4 \
-    "${outfile:=${outfile_default}}"
-}
-
-
-xfade_va2 () {
-    ffmpeg \
-    -hide_banner \
-    -stats -v panic \
-    -i "${clip1}" -i "${clip2}" \
-    -filter_complex \
-    "[0:v][1:v]xfade=transition='${transition:=${transition_default}}':duration='${dur:=${duration_default}}':offset='${offset:=${offset_default}}'[xfade];
-    [0:a]atrim=0:'${audio_trim}'[atrim];
+    [0:a]atrim=0:'${audio_trim:=${audio_trim_default}}'[atrim];
     [atrim][1:a]acrossfade=d='${dur:=${duration_default}}'[afade]
     " \
     -map "[xfade]" -map "[afade]" \
@@ -154,4 +124,4 @@ xfade_va2 () {
 #fi
 
 # run the xfade_va function
-xfade_va2 "${clip1}" "${clip2}"
+xfade_va "${clip1}" "${clip2}"
