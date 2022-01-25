@@ -92,7 +92,8 @@ xfade_va () {
     -stats -v panic \
     -i "${clip1}" -i "${clip2}" \
     -filter_complex \
-    "[0:v][1:v]xfade=transition='${transition:=${transition_default}}':duration='${dur:=${duration_default}}':offset='${offset}'[xfade];
+    "[0:v][1:v]xfade=transition=\
+    '${transition:=${transition_default}}':duration='${dur:=${duration_default}}':offset='${offset:=${offset_default}}'[xfade];
     [0:a]atrim=0:'${audio_trim}'[atrim];
     [atrim][1:a]acrossfade=d='${dur}'[afade]
     " \
@@ -119,4 +120,5 @@ xfade_va () {
 #   xfade_va "${clip1}" "${clip2}" # fade video and audio track
 #fi
 
-#xfade_va "${clip1}" "${clip2}"
+# run the xfade_va function
+xfade_va "${clip1}" "${clip2}"
