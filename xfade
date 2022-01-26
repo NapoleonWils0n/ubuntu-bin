@@ -106,22 +106,6 @@ xfade_va () {
     "${outfile:=${outfile_default}}"
 }
 
-# cross fade video
-#xfade_v () {
-#}
-
-# cross fade video
-
-# check if video has an audio track
-#clip1_check="$(ffprobe -i "${clip1}" -show_streams -select_streams a -loglevel error)"
-#clip2_check="$(ffprobe -i "${clip2}" -show_streams -select_streams a -loglevel error)"
-
-# check if audio_check is null which means the video doesnt have an audio track
-#if [ -z "${clip1_check}" ] || [ -z "${clip2_check}" ]; then
-#   xfade_v "${clip1}" "${clip2}" # fade video track
-#else
-#   xfade_va "${clip1}" "${clip2}" # fade video and audio track
-#fi
 
 # run the xfade_va function
 xfade_va "${clip1}" "${clip2}"
