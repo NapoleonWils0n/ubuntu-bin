@@ -39,9 +39,6 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 # else display script usage and exit
 [ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
 
-# duration regex match 1
-#dur_long='^[1-2]\{1\}$'
-
 # getopts check and validate options
 while getopts ':a:b:d:t:f:o:h' opt
 do
