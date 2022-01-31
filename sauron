@@ -22,11 +22,10 @@ download() {
     while read line
     do
       tsp \
-      yt-dlp -f 'bestvideo[height<=?1080][fps<=?30][vcodec!=?vp9]+bestaudio/best' \
+      yt-dlp \
       --restrict-filenames \
       --no-playlist \
-      --ignore-config \
-       -o "~/Downloads/%(title)s.%(ext)s" \
+       -o "$HOME/Downloads/%(title)s.%(ext)s" \
       "${line}" 1>/dev/null
     done
 }
