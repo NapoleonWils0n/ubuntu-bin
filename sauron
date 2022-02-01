@@ -25,6 +25,7 @@ download() {
       tsp \
       yt-dlp \
       --no-playlist \
+      --downloader native \
       -o "$HOME/Downloads/%(title)s.%(ext)s" \
       "${line}" 1>/dev/null
     done
@@ -39,6 +40,7 @@ sponsorblock_download() {
       tsp \
       yt-dlp \
       --sponsorblock-remove all \
+      --downloader native \
       --no-playlist \
       -o "$HOME/Downloads/%(title)s.%(ext)s" \
       "${line}" 1>/dev/null
