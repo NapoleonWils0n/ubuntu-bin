@@ -24,7 +24,6 @@ download() {
     do
       tsp \
       yt-dlp \
-      --restrict-filenames \
       --no-playlist \
        -o "$HOME/Downloads/%(title)s.%(ext)s" \
       "${line}" 1>/dev/null
@@ -40,9 +39,7 @@ sponsorblock_download() {
       tsp \
       yt-dlp \
       --sponsorblock-remove all \
-      --restrict-filenames \
       --no-playlist \
-      --remux-video mkv \
        -o "$HOME/Downloads/%(title)s.%(ext)s" \
       "${line}" 1>/dev/null
     done
