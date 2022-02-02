@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# record usb audio output
+# change alsa_output.usb to alsa_output.pci to record speakers
 sox -t pulseaudio \
-$(pacmd list-sources | egrep -m1 '^\s+name:.*\.monitor' | awk -F '[<>]' '{print $2}') \
+$(pacmd list-sources | egrep -m1 '^\s+name:.*alsa_output.usb.*\.monitor' | awk -F '[<>]' '{print $2}') \
 -t wav system-audio-$(date +"%Y-%m-%d-%H-%M-%S").wav
