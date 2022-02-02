@@ -38,4 +38,4 @@ sink_monitor="${default_sink}.monitor"
 output_default="system-audio-$(date +"%Y-%m-%d-%H-%M-%S").wav"
 
 # record the default sink monitor with sox, reduce volume to 0.99 so audio doesnt clip
-sox -v 0.99 -t pulseaudio "${sink_monitor}" -t wav "${output:=${output_default}}"
+sox -r 44.1k -b 16 -v 0.99 -t pulseaudio "${sink_monitor}" -t wav "${output:=${output_default}}"
