@@ -73,7 +73,7 @@ output_default="${input_name}-cutlist-$(date +"%Y-%m-%d-%H-%M-%S").txt"
 #===============================================================================
 
 seconds () {
-awk -F. 'NR > 1 {printf("%s%s%s\n"), prev, ",", $0-prev}; {prev = $0}; NR--' < "${input}" > "${output:=${output_default}}"
+awk -F. 'NR > 1 && NR%2 == 0 {printf("%s%s%s\n"), prev, ",", $0-prev}; {prev = $0}' < "${input}" > "${output:=${output_default}}"
 }
 
 #===============================================================================
@@ -83,7 +83,7 @@ awk -F. 'NR > 1 {printf("%s%s%s\n"), prev, ",", $0-prev}; {prev = $0}; NR--' < "
 
 minutes () {
 awk -F: 'NF==3 { printf("%s\n"), ($1 * 3600) + ($2 * 60) + $3 } NF==2 { print ($1 * 60) + $2 } NF==1 { printf("$s\n"), 0 + $1 }' < "${input}" \
-| awk 'NR > 1 {printf("%s%s%s\n"), prev, "\n", $0-prev}; {prev = $0}; NR--' \
+| awk 'NR > 1 && NR%2 == 0 {printf("%s%s%s\n"), prev, "\n", $0-prev}; {prev = $0}' \
 | awk -F. 'NF==1 { printf("%02d:%02d:%02d\n"), ($1 / 3600), ($1 % 3600 / 60), ($1 % 60) }\
 NF==2 { printf("%02d:%02d:%02d.%s\n"), ($1 / 3600), ($1 % 3600 / 60), ($1 % 60), ($2) }' \
 | awk '{ORS = NR%2 ? "," : "\n"} 1' > "${output:=${output_default}}"
