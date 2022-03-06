@@ -18,6 +18,7 @@ rsync -aAXvz --ignore-errors --delete --progress \
 --exclude .dbus \
 --exclude .mozilla \
 --exclude .var \
+--exclude .kodi \
 --exclude .googleearth \
 --exclude .local/share/flatpak \
 /home/djwilcox /mnt/usb
