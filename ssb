@@ -55,7 +55,7 @@ shift $((OPTIND-1))
 #===============================================================================
 
 remote_path () {
-chromium --new-window --app="${input}" 2>/dev/null &
+chromium --new-window --app="${input}" 1>/dev/null &
 }
 
 
@@ -85,7 +85,7 @@ if [ "${input_dir}" = '.' ]; then
 fi
 
 # run chromium without chrome
-chromium --new-window --app=file://"${input_path}" 2>/dev/null &
+chromium --new-window --app=file://"${input_path}" 1>/dev/null &
 }
 
 
