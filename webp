@@ -81,7 +81,7 @@ quality_default='80'
 preset_default='none'
 framerate_default='15'
 width_default='600'
-output_default="${input_name}-$(date +"%Y-%m-%d-%H-%M-%S").webp"
+output_default="${input_name}.webp"
 
 
 #===============================================================================
