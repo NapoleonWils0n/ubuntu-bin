@@ -24,7 +24,7 @@ $(basename "$0") -i input -c 0-6 -q 0-100 -f 15 -w 600 -p none -o output.webp
 -w width: default 600px
 -p preset: none|default|picture|photo|drawing|icon|text : default none
 -o output.webp :optional agument 
-# if option not provided defaults infile-name-date-time.webp"
+# if option not provided defaults infile-name.webp"
 exit 2
 }
 
