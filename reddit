@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# newsboat reddit feeds
+newsboat -C ~/.config/newsboat/config-reddit \
+-u ~/.config/newsboat/urls-reddit -c ~/.local/share/newsboat/cache-reddit.db
