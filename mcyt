@@ -57,7 +57,7 @@ shift $((OPTIND-1))
 #===============================================================================
 
 # youtube-dl best format
-url=$(yt-dlp -f best -g --no-playlist "${infile}")
+url=$(yt-dlp -f best -g --no-playlist "${infile}" 2>/dev/null)
 
 # check url with ffprobe for errors and swap stderr and stdout to store error
 url_check=$(ffprobe -hide_banner -v warning -i "${url}" 3>&2 2>&1 1>&3 >/dev/null)
@@ -85,7 +85,7 @@ ffmpeg \
 #===============================================================================
 
 two_streams () {
-url=$(youtube-dl -g --no-playlist "${infile}")
+url=$(yt-dlp -f best -g --no-playlist "${infile}")
 video_url=$(echo "${url}" | awk 'BEGIN{ RS ="" ; FS ="\n" }{print $1}')
 audio_url=$(echo "${url}" | awk 'BEGIN{ RS ="" ; FS ="\n" }{print $2}')
 
