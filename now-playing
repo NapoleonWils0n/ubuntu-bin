@@ -107,19 +107,17 @@ if [ "${urlcheck}" -eq 7 ]; then
 fi
 
 
-# body - artist, player, status, duration and position
+# body - artist, player, status, duration and position + notify-send
 #====================================================================
 
 # check if duration is empty
 if [ -z "${duration}" ]; then
     body="Artist: ${artist:=${artist_fallback}}\nPlayer: ${player}\nStatus: ${status}\nDuration: ${duration_fallback}\nPosition: ${position_fallback}"
+    notify-send -i "${icon:=${icon_fallback}}" "${title}" "${body}"
 else
     body="Artist: ${artist:=${artist_fallback}}\nPlayer: ${player}\nStatus: ${status}\nDuration: ${duration}\nPosition: ${position}"
+    position_seconds=$(echo "${position}" | awk -F: 'NF==3 { printf("%s\n"), ($1 * 3600) + ($2 * 60) + $3 } NF==2 { print ($1 * 60) + $2 } NF==1 { printf("$s\n"), 0 + $1 }')
+    duration_seconds=$(echo "${duration}" | awk -F: 'NF==3 { printf("%s\n"), ($1 * 3600) + ($2 * 60) + $3 } NF==2 { print ($1 * 60) + $2 } NF==1 { printf("$s\n"), 0 + $1 }')
+    position_percent=$(echo "${position_seconds} ${duration_seconds}" | awk '{ print ($1 / $2) * 100 }' | awk -F. '{ print $1 }')
+    notify-send -h "int:value:${position_percent}" -i "${icon:=${icon_fallback}}" "${title}" "${body}"
 fi
-
-
-# notify-send
-#====================================================================
-
-notify-send -i "${icon:=${icon_fallback}}" "${title}" "${body}"
-
