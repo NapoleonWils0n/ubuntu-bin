@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# task-spooler mpv play clipboard
+tsp mpv $(xclip -o) 1>/dev/null
