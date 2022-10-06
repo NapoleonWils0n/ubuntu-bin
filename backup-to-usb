@@ -14,6 +14,7 @@ rsync -aAXvz --ignore-errors --delete --progress \
 --exclude .nix-channels \
 --exclude .nix-defexpr \
 --exclude .nix-profile \
+--exclude .config/xmonad \
 --exclude .cache \
 --exclude .dbus \
 --exclude .mozilla \
