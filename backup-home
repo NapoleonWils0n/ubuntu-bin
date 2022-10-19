@@ -18,6 +18,7 @@ rsync -avz --ignore-errors -e ssh --delete --progress \
 --exclude .dbus \
 --exclude .mozilla \
 --exclude .var \
+--exclude .cargo \
 --exclude .kodi \
 --exclude .googleearth \
 --exclude .local/share/flatpak \
