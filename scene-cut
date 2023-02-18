@@ -4,6 +4,8 @@
 # ffmpeg scene cut
 #===============================================================================
 
+# dependencies:
+# ffmpeg 
 
 #===============================================================================
 # script usage
@@ -29,8 +31,6 @@ exit 2
 INVALID_OPT_ERR='Invalid option:'
 REQ_ARG_ERR='requires an argument'
 WRONG_ARGS_ERR='wrong number of arguments passed to script'
-NOT_MEDIA_FILE_ERR='is not a media file'
-NOTFILE_ERR='not a file'
 
 #===============================================================================
 # check number of aruments passed to script
@@ -46,10 +46,8 @@ NOTFILE_ERR='not a file'
 while getopts ':i:c:h' opt
 do
   case ${opt} in
-     i) input="${OPTARG}"
-	[ -f "${input}" ] || usage "${input} ${NOTFILE_ERR}";;
-     c) cutfile="${OPTARG}"
-	[ -f "${cutfile}" ] || usage "${cutfile} ${NOTFILE_ERR}";;
+     i) input="${OPTARG}";;
+     c) cutfile="${OPTARG}";;
      h) usage;;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
      :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
@@ -94,5 +92,5 @@ trim_video () {
 count=1
 while IFS=, read -r start duration; do
   trim_video
-  count="$(expr ${count} + 1)"
+  count="$((count+1))"
 done < "${cutfile}"

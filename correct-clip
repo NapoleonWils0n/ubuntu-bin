@@ -1,16 +1,25 @@
 #!/bin/sh
 
+#===============================================================================
+# correct a video clip by using a gimp curve
+#===============================================================================
+
 # code based on:
 # https://video.stackexchange.com/questions/16352/converting-gimp-curves-files-to-photoshop-acv-for-ffmpeg/20005#20005
 
-# correct a video clip by using a gimp curve
 # converted into a ffmpeg curves filter command
 # to adjust the levels and white balance
 
 # requires a curve file created with the following script
 # https://github.com/NapoleonWils0n/curve2ffmpeg
 
+# dependencies:
+# ffmpeg file grep
+
+#===============================================================================
 # script usage
+#===============================================================================
+
 usage()
 {
 # if argument passed to function echo it
@@ -28,26 +37,34 @@ $(basename "$0") -i infile.(mp4|mkv|mov|m4v) -c curve.txt -o outfile.mp4
 exit 2
 }
 
+
+#===============================================================================
 # error messages
-NOTFILE_ERR='not a file'
+#===============================================================================
+
 INVALID_OPT_ERR='Invalid option:'
 REQ_ARG_ERR='requires an argument'
 WRONG_ARGS_ERR='wrong number of arguments passed to script'
 NOT_MEDIA_FILE_ERR='is not a media file'
 NOT_TEXT_FILE_ERR='is not a text file'
 
-# if script is run arguments pass and check the options with getopts,
-# else display script usage and exit
+
+#===============================================================================
+# check number of aruments passed to script
+#===============================================================================
+
 [ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
 
-# getopts check and validate options
+
+#===============================================================================
+# getopts check options passed to script
+#===============================================================================
+
 while getopts ':i:c:o:h' opt
 do
   case ${opt} in
-     i) infile="${OPTARG}"
-	[ -f "${infile}" ] || { echo "${infile} ${NOTFILE_ERR}" && usage; };;
-     c) text="${OPTARG}"
-	[ -f "${text}" ] || { echo "${text} ${NOTFILE_ERR}" && usage; };;
+     i) infile="${OPTARG}";;
+     c) text="${OPTARG}";;
      o) outfile="${OPTARG}";;
      h) usage;;
      \?) echo "${INVALID_OPT_ERR} ${OPTARG}" 1>&2 && usage;;
@@ -55,6 +72,11 @@ do
   esac
 done
 shift $((OPTIND-1))
+
+
+#===============================================================================
+# variables
+#===============================================================================
 
 # infile, infile name
 infile_nopath="${infile##*/}"
@@ -74,7 +96,11 @@ else
    aac='aac' # libfdk_aac codec isnt installed, fall back to aac codec
 fi
 
-# correct video track
+
+#===============================================================================
+# functions
+#===============================================================================
+
 correct_v () {
     ffmpeg \
     -hide_banner \
@@ -126,13 +152,13 @@ txt_mime='text/plain'
 
 # check the files mime type is a video
 case "${filetype}" in
-    ${mov_mime}|${mkv_mime}|${mp4_mime}|${m4v_mime});;
+    "${mov_mime}"|"${mkv_mime}"|"${mp4_mime}"|"${m4v_mime}");;
     *) usage "${infile} ${NOT_MEDIA_FILE_ERR}";;
 esac
 
 # check the text file mime type is a text
 case "${textfile}" in
-    ${txt_mime});;
+    "${txt_mime}");;
     *) usage "${textfile} ${NOT_TEXT_FILE_ERR}";;
 esac
 

@@ -4,6 +4,8 @@
 # clip time - create ffmpeg cutlist
 #===============================================================================
 
+# dependencies:
+# ffmpeg ffprobe
 
 #===============================================================================
 # script usage
@@ -29,7 +31,6 @@ exit 2
 INVALID_OPT_ERR='Invalid option:'
 REQ_ARG_ERR='requires an argument'
 WRONG_ARGS_ERR='wrong number of arguments passed to script'
-NOTFILE_ERR='not a file'
 
 #===============================================================================
 # check number of aruments passed to script
@@ -45,8 +46,7 @@ NOTFILE_ERR='not a file'
 while getopts ':i:o:h' opt
 do
   case ${opt} in
-     i) input="${OPTARG}"
-	[ -f "${input}" ] || usage "${input} ${NOTFILE_ERR}";;
+     i) input="${OPTARG}";;
      h) usage;;
      o) output="${OPTARG}";;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
@@ -114,11 +114,10 @@ seconds=$(echo "${check}" | grep -E "${seconds_regex}")
 # check timecode and run function
 #===============================================================================
 
-if [ ! -z "${minutes}" ]; then
+if [ -n "${minutes}" ]; then
   minutes
-elif [ ! -z "${seconds}" ]; then
+elif [ -n "${seconds}" ]; then
   seconds
 else 
     usage
 fi
-
