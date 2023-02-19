@@ -1,12 +1,12 @@
 #!/bin/sh
 
 #===============================================================================
-# loudnorm
-# ffmpeg loudnorm
+# vid2gif
+# convert a video into a gif animation
 #===============================================================================
 
 # dependencies:
-# ffmpeg
+# ffmpeg ffprobe cut
 
 #===============================================================================
 # script usage
@@ -18,9 +18,16 @@ usage()
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-# ffmpeg loudnorm
+# convert a video into a gif animation
 
-$(basename "$0") -i input.(mp4|mkv|mov|m4v|aac|m4a|wav|mp3)"
+$(basename "$0") -s 00:00:00.000 -i input.(mp4|mov|mkv|m4v) -t 00:00:00.000 -f [00] -w [0000] -o output.gif
+-s 00:00:00.000 : start time
+-i input.(mp4|mov|mkv|m4v)
+-t 00:00:00.000 : number of seconds after start time
+-f [00]         : framerate
+-w [0000]       : width
+-o output.gif   :optional agument 
+# if option not provided defaults input-name-gif-date-time.gif"
 exit 2
 }
 
@@ -45,11 +52,16 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 # getopts check the options passed to the script
 #===============================================================================
 
-while getopts ':i:h' opt
+while getopts ':s:i:t:f:w:o:h' opt
 do
   case ${opt} in
+     s) start="${OPTARG}";;
      i) infile="${OPTARG}";;
+     t) end="${OPTARG}";;
+     f) framerate="${OPTARG}";;
+     w) width="${OPTARG}";;
      h) usage;;
+     o) outfile="${OPTARG}";;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
      :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
   esac
@@ -58,17 +70,36 @@ shift $((OPTIND-1))
 
 
 #===============================================================================
+# variables
+#===============================================================================
+
+# input name
+infile_nopath="${infile##*/}"
+infile_name="${infile_nopath%.*}"
+
+# defaults for variables if not defined
+start_default='00:00:00'
+end_default=$(ffprobe -v error -sexagesimal -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$infile" | cut -d\. -f1)
+framerate_default='15'
+width_default='320'
+outfile_default="${infile_name}-gif-$(date +"%Y-%m-%d-%H-%M-%S").gif"
+
+
+#===============================================================================
 # functions
 #===============================================================================
 
-# ffmpeg loudnorm get stats from file
-normalize () {
+# create gif function
+create_gif () {
     ffmpeg \
     -hide_banner \
+    -stats -v panic \
+    -ss "${start:=${start_default}}" \
     -i "${infile}" \
-    -af "loudnorm=I=-16:dual_mono=true:TP=-1.5:LRA=11:print_format=summary" \
-    -f null -
+    -t "${end:=${end_default}}" \
+    -filter_complex "[0:v] fps=${framerate:=${framerate_default}},scale=${width:=${width_default}}:-1:flags=lanczos,split [a][b];[a] palettegen [p];[b][p] paletteuse" \
+    "${outfile:=${outfile_default}}"
 }
 
-# run the normalize function
-normalize "${infile}"
+# run the create_gif function
+create_gif "${infile}"
