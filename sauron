@@ -8,85 +8,156 @@
 # input set to args passed to script
 input=$(printf "%s\n" "$@")
 
-# mpd and taskspooler
-audio() {
-    printf "%s\n" "${input}" | \
-    while read line
-    do
-      tsp pinch -i "${line}" 1>/dev/null 
-    done
-}
 
-# download with yt-dlp
-download() {
+# mpv and taskspooler
+video() {
     printf "%s\n" "${input}" | \
-    while read line
+    while read -r line
     do
-      tsp \
-      yt-dlp \
-      --no-playlist \
-      -f 'bestvideo[height<=1080][vcodec!=?vp9]+bestaudio[acodec!=?opus]' \
-      -o "$HOME/Downloads/%(title)s.%(ext)s" \
-      "${line}" 1>/dev/null
-    done
-}
-
-
-# download with yt-dlp with sponsorblock to remove sponsor
-sponsorblock_download() {
-    printf "%s\n" "${input}" | \
-    while read line
-    do
-      tsp \
-      yt-dlp \
-      --no-playlist \
-      --sponsorblock-remove all \
-      -f 'bestvideo[height<=1080][vcodec!=?vp9]+bestaudio[acodec!=?opus]' \
-      -o "$HOME/Downloads/%(title)s.%(ext)s" \
-      "${line}" 1>/dev/null
+      ts mpv --no-terminal "${line}" 1>/dev/null
     done
 }
 
 # mpv fullscreen on second display and taskspooler
 fullscreen() {
     printf "%s\n" "${input}" | \
-    while read line
+    while read -r line
     do
-      tsp mpv --fs --screen=1 "${line}" 1>/dev/null 
+      ts mpv --no-terminal --fs --fs-screen=1 "${line}" 1>/dev/null 
     done
 }
 
-# mpv and taskspooler
-video() {
+dash () {
     printf "%s\n" "${input}" | \
-    while read line
+    while read -r line
     do
-      tsp mpv --no-terminal "${line}" 1>/dev/null
+      dash-ffmpeg -i "${line}"
+    done
+}
+
+# copy url to the clipboard
+copy() {
+    printf "%s\n" "${input}" | xclip -i -selection clipboard 1>/dev/null
+}
+
+# open link in browser
+open() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+      xdg-open "${line}" 1>/dev/null 
+    done
+}
+
+# yt-dlp download
+ytdlp() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+      ts \
+      yt-dlp \
+      --ignore-config \
+      --no-playlist \
+      -f 'bestvideo[height<=1080][vcodec!=?vp9]+bestaudio[acodec!=?opus]' \
+      -o "$HOME/downloads/%(title)s.%(ext)s" \
+      "${line}" 1>/dev/null
+    done
+}
+
+# aria2c download
+aria2c() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+      ts \
+      yt-dlp \
+      --ignore-config \
+      --no-playlist \
+      -f 'bestvideo[height<=1080][vcodec!=?vp9]+bestaudio[acodec!=?opus]' \
+      --downloader aria2c --downloader-args aria2c:'-c -j 3 -x 3 -s 3 -k 1M' \
+      -o "$HOME/downloads/%(title)s.%(ext)s" \
+      "${line}" 1>/dev/null
+    done
+}
+
+# ffmpeg download
+ffmpeg() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+      ts \
+      yt-dlp \
+      --ignore-config \
+      --no-playlist \
+      -f 'bestvideo[height<=1080][vcodec!=?vp9]+bestaudio[acodec!=?opus]' \
+      --downloader ffmpeg --downloader-args ffmpeg:'-hide_banner -stats -v panic' \
+      -o "$HOME/downloads/%(title)s.%(ext)s" \
+      "${line}" 1>/dev/null
+    done
+}
+
+# download with yt-dlp with sponsorblock to remove sponsor
+sponsorblock_download() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+      ts \
+      yt-dlp \
+      --ignore-config \
+      --no-playlist \
+      --sponsorblock-remove all \
+      -f 'bestvideo[height<=1080][vcodec!=?vp9]+bestaudio[acodec!=?opus]' \
+      -o "$HOME/downloads/%(title)s.%(ext)s" \
+      "${line}" 1>/dev/null
+    done
+}
+
+# mpd and taskspooler
+audio() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+      ts pinch -i "${line}" 1>/dev/null 
     done
 }
 
 # fzf prompt variables spaces to line up menu options
-audio_tsp='audio        - mpd play audio'
-download_tsp='download     - yt-dlp download links'
-sponsorblock_tsp='sponsorblock - sponsorblock yt-dlp'
-fullscreen_tsp='fullscreen   - mpv play fullscreen on second display'
-video_tsp='video        - mpv play video on current display'
+audio_ts='audio        - mpd play audio'
+copy='copy         - copy url'
+dash='dash         - combine dash streams and pipe into mpv'
+ytdlp_ts='yt-dlp       - yt-dlp download links'
+aria2c_ts='aria2c       - aria2c download links'
+ffmpeg_ts='ffmpeg       - ffmpeg download links'
+open='open         - open link in browser'
+sponsorblock_ts='sponsorblock - sponsorblock yt-dlp'
+fullscreen_ts='fullscreen   - mpv play fullscreen on second display'
+video_ts='video        - mpv play video on current display'
 
 # fzf prompt to specify function to run on links from ytfzf
 menu=$(printf "%s\n" \
-	      "${audio_tsp}" \
-	      "${download_tsp}" \
-	      "${sponsorblock_tsp}" \
-	      "${fullscreen_tsp}" \
-	      "${video_tsp}" \
+	      "${fullscreen_ts}" \
+	      "${video_ts}" \
+	      "${dash}" \
+	      "${ytdlp_ts}" \
+	      "${aria2c_ts}" \
+	      "${ffmpeg_ts}" \
+	      "${copy}" \
+	      "${open}" \
+	      "${audio_ts}" \
+	      "${sponsorblock_ts}" \
 	      | fzf --delimiter='\n' --prompt='Pipe links to: ' --info=inline --layout=reverse --no-multi)
 
 # case statement to run function based on fzf prompt output
 case "${menu}" in
    audio*) audio;;
-   download*) download;;
+   aria2c*) aria2c;;
+   copy*) copy;;
+   dash*) dash;;
+   open*) open;;
    sponsor*)sponsorblock_download ;;
+   ffmpeg*) ffmpeg;;
    fullscreen*) fullscreen;;
    video*) video;;
+   yt-dlp*) ytdlp;;
    *) exit;;
 esac

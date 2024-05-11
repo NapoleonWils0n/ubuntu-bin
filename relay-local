@@ -1,29 +1,21 @@
 #!/bin/sh
 
+
 #===============================================================================
-# subtitle-add
-# add subtitles to a video
+# relay a local video to a named pipe
 #===============================================================================
 
-# dependencies:
-# ffmpeg
 
 #===============================================================================
 # script usage
 #===============================================================================
 
-usage()
-{
+usage () {
 # if argument passed to function echo it
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-# add subtitles to a video
-
-$(basename "$0") -i input.(mp4|mkv|mov|m4v) -s subtitle.(srt|vtt) -o output.mp4
--i input.(mp4|mkv|mov|m4v)
--s subtitle.(srt|vtt)
--o output.mp4 : optional argument # if option not provided defaults to input-name-subs-date-time"
+$(basename "$0") -i url -s 00:00:00 -t 00:00:00"
 exit 2
 }
 
@@ -38,22 +30,22 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 
 
 #===============================================================================
-# check the number of arguments passed to the script
+# check number of aruments passed to script
 #===============================================================================
 
 [ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
 
 
 #===============================================================================
-# getopts check the options passed to the script
+# getopts check options passed to script
 #===============================================================================
 
-while getopts ':i:s:o:h' opt
+while getopts ':s:i:t:h' opt
 do
   case ${opt} in
-     i) video="${OPTARG}";;
-     s) subs="${OPTARG}";;
-     o) outfile="${OPTARG}";;
+     s) start="${OPTARG}";;
+     i) input="${OPTARG}";;
+     t) end="${OPTARG}";;
      h) usage;;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
      :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
@@ -63,37 +55,51 @@ shift $((OPTIND-1))
 
 
 #===============================================================================
-# variables
+# named pipe
 #===============================================================================
 
-# input, input name and extension
-video_nopath="${video##*/}"
-video_name="${video_nopath%.*}"
-
-# defaults for variables if not defined
-outfile_default="${video_name}-subs-$(date +"%Y-%m-%d-%H-%M-%S").mp4"
+# check if the /tmp/relay named pipe exist otherwise create it
+[ -p /tmp/relay ] || mkfifo /tmp/relay
 
 
 #===============================================================================
-# functions
+# one stream containing audio and video
 #===============================================================================
 
-# audio is aac, copy audio stream
-addsubs () {
-    ffmpeg \
-    -hide_banner \
-    -stats -v panic \
-    -i "${video}" \
-    -f srt \
-    -i "${subs}" \
-    -c:a copy \
-    -c:v copy \
-    -c:s mov_text -metadata:s:s:0 \
-    language=eng \
-    -movflags +faststart \
-    -f mp4 \
-    "${outfile:=${outfile_default}}"
+# copy audio and video streams
+one_stream () {
+ffmpeg \
+-hide_banner \
+-y \
+-i "${input}" \
+-c:a copy -c:v copy \
+-tune zerolatency \
+-f matroska /tmp/relay
 }
 
-# run the addsubs function
-addsubs "$video" "$subs"
+
+# trim video and re-encode
+one_stream_trim () {
+ffmpeg \
+-hide_banner \
+-y \
+-ss "${start}" \
+-i "${input}" \
+-t "${end}" \
+-c:a aac \
+-c:v libx264 -profile:v high \
+-tune zerolatency \
+-f matroska /tmp/relay
+}
+
+
+
+#===============================================================================
+# case statement check for number of streams
+#===============================================================================
+
+if [ -z "${start}" ]; then
+    one_stream
+else
+    one_stream_trim
+fi    

@@ -1,0 +1,89 @@
+#!/bin/sh
+
+# transmission fzf menu
+
+# input = list of torrents
+input=$(transmission-remote -l \
+| awk 'NR == 1; NR > 1 {print $0 | "sort -k 2 -n"}' \
+| fzf --multi --info=inline --layout=reverse --header-lines=1 --delimiter='\n' --prompt='Select Torrents: ' | awk '{print $1}')
+
+
+# exit script if no torrents are selected (e.g hit ESC)
+if [ "${input}" = "" ]; then exit; fi
+
+
+# main trd function
+trd() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+      transmission-remote -t"${line}" "${1}" ;
+    done
+    }
+
+
+# get files from torrent
+get_files() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+	selection=$(transmission-remote -t"${line}" --info-files \
+		| fzf --multi --info=inline --layout=reverse --header-lines=2 --delimiter='\n' --prompt='Select Files: ' \
+		| awk -F':' -v RS="\n" '{print $1}' | awk 'a++{printf ","}{printf "%s", $1}')
+	transmission-remote -t"${line}" -g"${selection}";
+    done
+    }
+
+
+# dont get files from torrent
+noget_files() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+	selection=$(transmission-remote -t"${line}" --info-files \
+		| fzf --multi --info=inline --layout=reverse --header-lines=2 --delimiter='\n' --prompt='Select Files: ' \
+		| awk -F':' -v RS="\n" '{print $1}' | awk 'a++{printf ","}{printf "%s", $1}')
+	transmission-remote -t"${line}" -G"${selection}";
+    done
+    }
+
+
+# fzf prompt variables spaces to line up menu options
+start_menu='start      - start torrent'
+pause_menu='pause      - pause torrent'
+info_menu='info       - show torrent info'
+files_menu='files      - show files in torrent'
+get_files_menu='get        - get items in torrent'
+noget_files_menu='noget      - noget items in torrent'
+peers_menu='peers      - ask for more peers'
+remove_menu='remove     - remove torrent'
+purge_menu='purge      - remove torrent and data'
+
+
+# fzf prompt to specify function to run on links from ytfzf
+menu=$(printf "%s\n" \
+	      "${start_menu}" \
+	      "${pause_menu}" \
+	      "${info_menu}" \
+	      "${files_menu}" \
+	      "${get_files_menu}" \
+	      "${noget_files_menu}" \
+	      "${peers_menu}" \
+	      "${remove_menu}" \
+	      "${purge_menu}" \
+	      | fzf --delimiter='\n' --prompt='Run transmission function: ' --info=inline --layout=reverse --no-multi)
+
+
+# case statement to run function based on fzf prompt output
+case "${menu}" in
+   start*) trd --start;;
+   pause*) trd --stop;;
+   info*) trd --info;;
+   peers*) trd --reannounce;;
+   files*) trd --info-files;;
+   get*) get_files;;
+   noget*) noget_files;;
+   remove*) trd --remove;;
+   purge*) trd --remove-and-delete;;
+   *) exit;;
+esac

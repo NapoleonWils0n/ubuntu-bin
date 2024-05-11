@@ -12,5 +12,5 @@ if [ "$prefix" = "" ]; then exit; fi
 input=$(echo | fzf --print-query --prompt="${prefix}: " --info=inline --layout=reverse)
 
 # open the search query with w3m
-w3m -T text/html "$(surfraw -p $prefix $input)"
+w3m -T text/html "$(surfraw -p "$prefix" "$input")"
 

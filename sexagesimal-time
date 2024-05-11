@@ -1,29 +1,24 @@
 #!/bin/sh
 
 #===============================================================================
-# subtitle-add
-# add subtitles to a video
+# sexagesimal-time
+# calculate sexagesimal duration by subtacting end time from start time
 #===============================================================================
 
 # dependencies:
-# ffmpeg
+# awk
 
 #===============================================================================
 # script usage
 #===============================================================================
 
-usage()
-{
+usage () {
 # if argument passed to function echo it
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-# add subtitles to a video
-
-$(basename "$0") -i input.(mp4|mkv|mov|m4v) -s subtitle.(srt|vtt) -o output.mp4
--i input.(mp4|mkv|mov|m4v)
--s subtitle.(srt|vtt)
--o output.mp4 : optional argument # if option not provided defaults to input-name-subs-date-time"
+calculate sexagesimal duration by subtacting end time from start time
+$(basename "$0") -s 00:00:00 -e 00:00:00"
 exit 2
 }
 
@@ -48,13 +43,12 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 # getopts check the options passed to the script
 #===============================================================================
 
-while getopts ':i:s:o:h' opt
+while getopts ':s:e:h' opt
 do
   case ${opt} in
-     i) video="${OPTARG}";;
-     s) subs="${OPTARG}";;
-     o) outfile="${OPTARG}";;
+     s) start="${OPTARG}";;
      h) usage;;
+     e) end="${OPTARG}";;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
      :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
   esac
@@ -63,37 +57,33 @@ shift $((OPTIND-1))
 
 
 #===============================================================================
-# variables
+# function
 #===============================================================================
 
-# input, input name and extension
-video_nopath="${video##*/}"
-video_name="${video_nopath%.*}"
-
-# defaults for variables if not defined
-outfile_default="${video_name}-subs-$(date +"%Y-%m-%d-%H-%M-%S").mp4"
-
-
-#===============================================================================
-# functions
-#===============================================================================
-
-# audio is aac, copy audio stream
-addsubs () {
-    ffmpeg \
-    -hide_banner \
-    -stats -v panic \
-    -i "${video}" \
-    -f srt \
-    -i "${subs}" \
-    -c:a copy \
-    -c:v copy \
-    -c:s mov_text -metadata:s:s:0 \
-    language=eng \
-    -movflags +faststart \
-    -f mp4 \
-    "${outfile:=${outfile_default}}"
+sexagesimal () {
+printf "%s %s\n" "${start}" "${end}" \
+| awk '
+        {
+          start = $1
+          end = $2
+          if (start ~ /:/) {
+            split(start, t, ":")
+            sseconds = (t[1] * 3600) + (t[2] * 60) + t[3] 
+          }
+          if (end ~ /:/) {
+            split(end, t, ":")
+            eseconds = (t[1] * 3600) + (t[2] * 60) + t[3] 
+          }
+          duration = eseconds - sseconds
+          printf("%s\n"), duration
+     }' \
+| awk -F. 'NF==1 { printf("%02d:%02d:%02d\n"), ($1 / 3600), ($1 % 3600 / 60), ($1 % 60) }\
+NF==2 { printf("%02d:%02d:%02d.%s\n"), ($1 / 3600), ($1 % 3600 / 60), ($1 % 60), ($2) }'
 }
 
-# run the addsubs function
-addsubs "$video" "$subs"
+
+#===============================================================================
+# run function
+#===============================================================================
+
+sexagesimal 

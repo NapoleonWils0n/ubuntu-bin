@@ -1,12 +1,9 @@
 #!/bin/sh
 
 #===============================================================================
-# subtitle-add
-# add subtitles to a video
+# convert video to prores and audio to pcm
 #===============================================================================
 
-# dependencies:
-# ffmpeg
 
 #===============================================================================
 # script usage
@@ -18,12 +15,11 @@ usage()
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-# add subtitles to a video
+# convert video to prores and audio to pcm
 
-$(basename "$0") -i input.(mp4|mkv|mov|m4v) -s subtitle.(srt|vtt) -o output.mp4
--i input.(mp4|mkv|mov|m4v)
--s subtitle.(srt|vtt)
--o output.mp4 : optional argument # if option not provided defaults to input-name-subs-date-time"
+$(basename "$0") -i infile.(mp4|mkv|mov|m4v|webm) -o outfile.mov
+-i infile.(mp4|mkv|mov|m4v|webm)
+-o outfile.mov :optional agument # if option not provided defaults to infile-name-prores-date-time"
 exit 2
 }
 
@@ -32,27 +28,28 @@ exit 2
 # error messages
 #===============================================================================
 
+NOTFILE_ERR='not a file'
 INVALID_OPT_ERR='Invalid option:'
 REQ_ARG_ERR='requires an argument'
 WRONG_ARGS_ERR='wrong number of arguments passed to script'
 
 
 #===============================================================================
-# check the number of arguments passed to the script
+# check number of aruments passed to script
 #===============================================================================
 
 [ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
 
 
 #===============================================================================
-# getopts check the options passed to the script
+# getopts check options passed to script
 #===============================================================================
 
-while getopts ':i:s:o:h' opt
+while getopts ':i:o:h' opt
 do
   case ${opt} in
-     i) video="${OPTARG}";;
-     s) subs="${OPTARG}";;
+     i) infile="${OPTARG}"
+	[ -f "${infile}" ] || usage "${infile} ${NOTFILE_ERR}";;
      o) outfile="${OPTARG}";;
      h) usage;;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
@@ -66,34 +63,32 @@ shift $((OPTIND-1))
 # variables
 #===============================================================================
 
-# input, input name and extension
-video_nopath="${video##*/}"
-video_name="${video_nopath%.*}"
+infile_nopath="${infile##*/}"
+infile_name="${infile_nopath%.*}"
 
 # defaults for variables if not defined
-outfile_default="${video_name}-subs-$(date +"%Y-%m-%d-%H-%M-%S").mp4"
+outfile_default="${infile_name}-prores-$(date +"%Y-%m-%d-%H-%M-%S").mov"
 
 
 #===============================================================================
 # functions
 #===============================================================================
 
-# audio is aac, copy audio stream
-addsubs () {
+# dnxhd-pcm function
+prores () {
     ffmpeg \
     -hide_banner \
     -stats -v panic \
-    -i "${video}" \
-    -f srt \
-    -i "${subs}" \
-    -c:a copy \
-    -c:v copy \
-    -c:s mov_text -metadata:s:s:0 \
-    language=eng \
-    -movflags +faststart \
-    -f mp4 \
+    -i "${infile}" \
+    -c:v prores_ks \
+    -c:a pcm_s16le \
+    -profile:v 3 \
+    -vendor apl0 \
+    -qscale:v 1 \
+    -pix_fmt yuv422p10le \
+    -f mov \
     "${outfile:=${outfile_default}}"
 }
 
-# run the addsubs function
-addsubs "$video" "$subs"
+# run the prores function
+prores "${infile}"

@@ -1,12 +1,12 @@
 #!/bin/sh
 
 #===============================================================================
-# scene-cut
-# ffmpeg scene cut
+# chapter-add
+# add chapters to a video or audio file with ffmpeg
 #===============================================================================
 
 # dependencies:
-# ffmpeg 
+# ffmpeg
 
 #===============================================================================
 # script usage
@@ -17,10 +17,8 @@ usage () {
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-$(basename "$0") -i input -c cutfile
-
--i input.(mp4|mov|mkv|m4v)
--c cutfile"
+add chapters to a video or audio file with ffmpeg
+$(basename "$0") -i input -c metadata.txt -o output"
 exit 2
 }
 
@@ -33,6 +31,7 @@ INVALID_OPT_ERR='Invalid option:'
 REQ_ARG_ERR='requires an argument'
 WRONG_ARGS_ERR='wrong number of arguments passed to script'
 
+
 #===============================================================================
 # check the number of arguments passed to the script
 #===============================================================================
@@ -44,12 +43,13 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 # getopts check the options passed to the script
 #===============================================================================
 
-while getopts ':i:c:h' opt
+while getopts ':i:c:o:h' opt
 do
   case ${opt} in
      i) input="${OPTARG}";;
-     c) cutfile="${OPTARG}";;
+     c) metadata="${OPTARG}";;
      h) usage;;
+     o) output="${OPTARG}";;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
      :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
   esac
@@ -65,53 +65,29 @@ shift $((OPTIND-1))
 input_nopath="${input##*/}"
 input_name="${input_nopath%.*}"
 
+# input file extension
+input_ext="${input##*.}"
+
+# output file name
+output_default="${input_name}-metadata.${input_ext}"
+
+
 #===============================================================================
-# ffmpeg create clips - nostdin needed to avoid clash with read command
+# sexagesimal function
 #===============================================================================
 
-trim_video () {
-# awk convert start and end time from sexagesimal time to seconds
-# add the start and end time to get the endpoint and convert from seconds back to sexagesimal time
-    endtime=$(printf "%s %s\n" "${start}" "${duration}" \
-    | awk '
-            {
-              start = $1
-              end = $2
-              if (start ~ /:/) {
-                split(start, t, ":")
-                sseconds = (t[1] * 3600) + (t[2] * 60) + t[3] 
-              }
-              if (end ~ /:/) {
-                split(end, t, ":")
-                eseconds = (t[1] * 3600) + (t[2] * 60) + t[3] 
-              }
-              duration = eseconds + sseconds
-              printf("%s\n"), duration
-         }' \
-    | awk -F. 'NF==1 { printf("%02d:%02d:%02d\n"), ($1 / 3600), ($1 % 3600 / 60), ($1 % 60) }\
-    NF==2 { printf("%02d:%02d:%02d.%s\n"), ($1 / 3600), ($1 % 3600 / 60), ($1 % 60), ($2) }'
-    )
-    output="${input_name}-[${start}-${endtime}].mp4" 
+meta () {
     ffmpeg \
-    -nostdin \
     -hide_banner \
     -stats -v panic \
-    -ss "${start}" \
     -i "${input}" \
-    -t "${duration}" \
-    -c:a aac \
-    -c:v libx264 -profile:v high \
-    -pix_fmt yuv420p -movflags +faststart \
-    -f mp4 \
-    "${output}"
+    -i "${metadata}" -map_metadata 1 -c copy \
+    "${output:=${output_default}}"
 }
 
 
 #===============================================================================
-# read file and set IFS=, read = input before , duration = input after ,
+# run function
 #===============================================================================
 
-count=1
-while IFS=, read -r start duration; do
-  trim_video
-done < "${cutfile}"
+meta
