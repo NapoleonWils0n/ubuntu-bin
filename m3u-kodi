@@ -1,30 +1,22 @@
 #!/bin/sh
 
 #===============================================================================
-# extract-frame
-# extract a frame from a video as a png file
+# youtube create a m3u playlist for kodi
 #===============================================================================
 
 # dependencies:
-# ffmpeg
+# yt-dlp awk
 
 #===============================================================================
 # script usage
 #===============================================================================
 
-usage()
-{
+usage () {
 # if argument passed to function echo it
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-# extract a frame from a video as a png file
-https://trac.ffmpeg.org/wiki/Seeking
-
-$(basename "$0") -i input.(mp4|mov|mkv|m4v|webm) -s 00:00:00.000 -o output.png
--i input.(mp4|mov|mkv|m4v)
--s 00:00:00.000    : optional argument # if option not provided defaults to 00:00:00
--o outfile.png     : optional argument # if option not provided defaults to input-name-timecode"
+$(basename "$0") -i input"
 exit 2
 }
 
@@ -49,12 +41,10 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 # getopts check the options passed to the script
 #===============================================================================
 
-while getopts ':i:s:o:h' opt
+while getopts ':i:h' opt
 do
   case ${opt} in
-     i) infile="${OPTARG}";;
-     s) seconds="${OPTARG}";;
-     o) outfile="${OPTARG}";;
+     i) input="${OPTARG}";;
      h) usage;;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
      :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
@@ -67,30 +57,25 @@ shift $((OPTIND-1))
 # variables
 #===============================================================================
 
-# input, input name
-infile_nopath="${infile##*/}"
-infile_name="${infile_nopath%.*}"
-
-# output file recording destination
-seconds_default='00:00:00'
-outfile_default="${infile_name}-[${seconds:=${seconds_default}}].png"
+video=$(yt-dlp --skip-download --print "%(id)s\%(title)s" "${input}")
+title=$(echo "${video}" | awk -F'\' '{ printf("%s\n"), $2 }')
+playlistdir="${HOME}/.kodi/userdata/playlists/video/"
+m3u="${playlistdir}${title}.m3u"
 
 
 #===============================================================================
-# functions
+# m3uplaylist function
 #===============================================================================
 
-# image to video function
-extract () {
-  ffmpeg \
-  -hide_banner \
-  -stats -v panic \
-  -ss "${seconds:=${seconds_default}}" \
-  -i "${infile}" \
-  -q:v 2 -f image2 \
-  -vframes 1 \
-  "${outfile:=${outfile_default}}"
+m3uplaylist () {
+echo "${video}" \
+| awk -F'\' '{ printf("%s\n%s %s\n%s%s\n"),\
+"#EXTM3U", "#EXTINF: 0,", $2, "plugin://plugin.video.youtube/play/?video_id=", $1 }' > "${m3u}"
 }
 
-# run the extract function
-extract "${infile}"
+
+#===============================================================================
+# run function
+#===============================================================================
+
+m3uplaylist
