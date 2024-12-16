@@ -52,7 +52,7 @@ shift $((OPTIND-1))
 ip_default='192.168.1.131'
 
 # default latency
-latency_default='0'
+latency_default='1000'
 
 # default port
 port_default='6882'
