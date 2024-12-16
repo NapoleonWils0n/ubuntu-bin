@@ -14,7 +14,7 @@ usage () {
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-$(basename "$0") -i ip -p port"
+$(basename "$0") -i ip -p port -l latency"
 exit 2
 }
 
