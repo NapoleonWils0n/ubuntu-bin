@@ -17,10 +17,10 @@ usage () {
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-$(basename "$0") -p play -x stop -s -+00 -f 00 -r 00)
+$(basename "$0") -p play -x stop -s -00 -f 00 -r 00)
 -p play    : toggle play/pause
 -x stop    : stop
--s seek    : -+00
+-s seek    : -00
 -f forward : 00
 -r rewind  : 00 "
 exit 2
