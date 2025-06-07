@@ -1,0 +1,102 @@
+#!/bin/sh
+
+#===============================================================================
+# combine-audio-video
+# combine audio and video
+#===============================================================================
+
+# dependencies:
+# ffmpeg file grep
+
+#===============================================================================
+# script usage
+#===============================================================================
+
+usage ()
+{
+# if argument passed to function echo it
+[ -z "${1}" ] || echo "! ${1}"
+# display help
+echo "\
+# combine audio and video
+
+$(basename "$0") -i input.(mp4|mkv|mov|m4v) -a audio.(m4a|aac|wav|mp3) -o output.mp4
+-i input.(mp4|mkv|mov|m4v)
+-a audio.(m4a|aac|wav|mp3)
+-o output.mp4 : optional argument # if option not provided defaults to input-name-combined-date-time"
+exit 2
+}
+
+
+#===============================================================================
+# error messages
+#===============================================================================
+
+INVALID_OPT_ERR='Invalid option:'
+REQ_ARG_ERR='requires an argument'
+WRONG_ARGS_ERR='wrong number of arguments passed to script'
+NOT_MEDIA_FILE_ERR='is not a media file'
+
+
+#===============================================================================
+# check the number of arguments passed to the script
+#===============================================================================
+
+[ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
+
+
+#===============================================================================
+# getopts check the options passed to the script
+#===============================================================================
+
+while getopts ':i:a:o:h' opt
+do
+  case ${opt} in
+     i) infile="${OPTARG}";;
+     a) audio="${OPTARG}";;
+     o) outfile="${OPTARG}";;
+     h) usage;;
+     \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
+     :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
+  esac
+done
+shift $((OPTIND-1))
+
+
+#===============================================================================
+# variables
+#===============================================================================
+
+# input, input name
+infile_nopath="${infile##*/}"
+infile_name="${infile_nopath%.*}"
+
+# defaults for variables
+outfile_default="${infile_name}-combined-$(date +"%Y-%m-%d-%H-%M-%S").mp4"
+
+
+#===============================================================================
+# functions
+#===============================================================================
+
+record_copy () {
+    ffmpeg \
+    -hide_banner \
+    -stats -v panic \
+    -i "${infile}" \
+    -i "${audio}" \
+    -c:a copy \
+    -c:v copy \
+    -map 0:0 -map 1:0 \
+    -pix_fmt yuv420p \
+    -movflags +faststart \
+    -f mp4 \
+    "${outfile:=${outfile_default}}"
+}
+
+
+#===============================================================================
+# run function
+#===============================================================================
+
+record_copy
