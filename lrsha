@@ -77,12 +77,12 @@ remote_sha=$(${path:=git} ls-remote ${remote_name} HEAD | awk '{print $1}')
 gitcompare () {
 if [ "${local_sha}" == "${remote_sha}" ]; then
   echo  "Local and remote sha sums match
-${local_sha}
-${remote_sha}"
+${local_sha} #local
+${remote_sha} #remote"
 else
   echo "Local and remote sha sums differ
-${local_sha}
-${remote_sha}"
+${local_sha} #local
+${remote_sha} #remote"
 fi
 }
 
