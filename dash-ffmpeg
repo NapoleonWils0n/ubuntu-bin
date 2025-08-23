@@ -63,7 +63,7 @@ shift $((OPTIND-1))
 #===============================================================================
 
 dash () {
-url=$(yt-dlp -f "bv*[height<=1080]+ba/b[height<=1080]" -g --no-playlist "${input}")
+url=$(yt-dlp -f "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]" -g --no-playlist "${input}" 2> /dev/null)
 video_url=$(echo "${url}" | awk 'BEGIN{ RS ="" ; FS ="\n" }{print $1}')
 audio_url=$(echo "${url}" | awk 'BEGIN{ RS ="" ; FS ="\n" }{print $2}')
 
@@ -71,15 +71,19 @@ audio_url=$(echo "${url}" | awk 'BEGIN{ RS ="" ; FS ="\n" }{print $2}')
 ffmpeg \
 -hide_banner \
 -stats -v panic \
--re \
 -i "${video_url}" \
 -i "${audio_url}" \
--c:a copy -c:v copy \
--tune zerolatency \
--map 0:0 -map 1:0 \
--f matroska pipe: | mpv - --cache 2048 --no-terminal --fs --fs-screen=1
+-c:v copy \
+-c:a copy \
+-map 0:v:0 \
+-map 1:a:0 \
+-f matroska pipe: | mpv - \
+--cache 2048 \
+--no-terminal --fs --fs-screen=1
 }
 
+
+#--cache 4096 \
 
 #===============================================================================
 # run function
