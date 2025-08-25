@@ -2,7 +2,7 @@
 
 #===============================================================================
 # dash-ffmpeg
-# combine dash audio and video streams witth ffmpeg and pipe into mpv
+# combine dash audio and video streams with ffmpeg and pipe into mpv
 #===============================================================================
 
 # dependencies:
@@ -18,7 +18,7 @@ usage ()
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-# combine dash audio and video streams witth ffmpeg and pipe into mpv
+# combine dash audio and video streams with ffmpeg and pipe into mpv
 
 $(basename "$0") -i input
 -i input"
