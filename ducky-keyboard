@@ -1,4 +1,30 @@
 #!/bin/sh
 
-# ducky keyboard
-setxkbmap -device 9 -layout gb -variant mac -option ctrl:swap_lalt_lctl,altwin:alt_super_win
+# toggle keymap for external keyboard
+usage="usage: $(basename "$0") [ on | off ]"
+
+# check if 1 argument is passed to the script
+[ $# = 1 ] || { printf "%s\n" "$usage"; exit 1; }
+
+# case statement
+input="$1"
+case "$input" in
+  on)
+        # change external keyboard layout
+        # external keyboard
+        setxkbmap -layout gb -variant mac -option ctrl:swap_lalt_lctl,altwin:alt_super_win
+        # scrolling
+        xmodmap ~/.Mouse-Xmodmap
+        break;;
+  off)
+        # reset keyboard layout
+        # internal keyboard
+        xkbcomp -I$HOME/.xkb $HOME/.xkb/keymap/keymap.xkb $DISPLAY
+        # scrolling
+        xmodmap ~/.Xmodmap
+
+        break;;
+  *)    printf "%s\n" "$usage";;
+esac
+
+

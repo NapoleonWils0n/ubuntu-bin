@@ -1,0 +1,100 @@
+#!/bin/sh
+
+#===============================================================================
+# backlight
+# change keyboard backlight
+#===============================================================================
+
+
+#===============================================================================
+# script usage
+#===============================================================================
+
+usage () {
+# if argument passed to function echo it
+[ -z "${1}" ] || echo "! ${1}"
+# display help
+echo "\
+$(basename "$0") -i off|half|on"
+exit 2
+}
+
+
+#===============================================================================
+# error messages
+#===============================================================================
+
+INVALID_OPT_ERR='Invalid option:'
+REQ_ARG_ERR='requires an argument'
+WRONG_ARGS_ERR='wrong number of arguments passed to script'
+
+
+#===============================================================================
+# check the number of arguments passed to the script
+#===============================================================================
+
+[ $# -ne 0 ] || usage "${WRONG_ARGS_ERR}"
+
+
+#===============================================================================
+# getopts check the options passed to the script
+#===============================================================================
+
+while getopts ':i:h' opt
+do
+  case ${opt} in
+     i) input="${OPTARG}";;
+     h) usage;;
+     \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
+     :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
+  esac
+done
+shift $((OPTIND-1))
+
+
+#===============================================================================
+# variables
+#===============================================================================
+
+# dell brightness location
+dell_brightness='/sys/class/leds/dell::kbd_backlight/brightness'
+
+# mac brightness location
+mac_brightness='/sys/class/leds/smc::kbd_backlight/brightness'
+
+
+#===============================================================================
+# functions
+#===============================================================================
+
+# backlight function first argument is brightness level
+backlight_level () {
+    local brightness_val="${1}" # Store the brightness value in a local variable for clarity
+
+    # Check if dell brightness file exists
+    if [ -f "${dell_brightness}" ]; then
+        doas sh -c "echo ${brightness_val} > ${dell_brightness}"
+        exit 0 # Exit after setting brightness for Dell
+    # Else, check if mac brightness file exists
+    elif [ -f "${mac_brightness}" ]; then
+        doas sh -c "echo ${brightness_val} > ${mac_brightness}"
+        exit 0 # Exit after setting brightness for Mac
+    # Else, no brightness file found
+    else
+        exit 1 # Exit with an error status
+    fi
+}
+
+
+#===============================================================================
+# Main logic to call function with argument
+#===============================================================================
+
+if [ -n "${input}" ]; then
+    case "${input}" in
+        off) backlight_level 0;;
+        half) backlight_level 127;;
+        on) backlight_level 255;;
+        *) usage "Invalid input: ${input}";;
+    esac
+fi

@@ -17,7 +17,7 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 
 # mpd host socket
 # MPD_HOST set in ~/.zshenv to "/run/user/1000/mpd/socket"
-host="${MPD_HOST}"
+host="/run/user/1000/mpd/socket"
 
 # if script is run arguments pass and check the options with getopts,
 # else display script usage and exit
@@ -38,6 +38,7 @@ shift $((OPTIND-1))
 # get the audio url and title
 url=$(yt-dlp --no-check-certificate --no-playlist -e -f bestaudio -g "${input}")
 link=$(echo "${url}" | awk -F' ' '/https:/ {print $1}') # audio url
+name=$(echo "${url}" | awk -F'https:' '{print $1}') # name of song
 
 # yt function
 yt () {
@@ -52,6 +53,7 @@ yt () {
 	fi
     else # audio playing insert url and play next
         mpc --host="${host}" add "${link}" 
+#	mpc --host="${host}" next
     fi
 }
 
